@@ -3,747 +3,1014 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Ujian Premium - Cluster Engine</title>
+    <title>CBT Belajar Sukses - Premium</title>
     <style>
         :root {
-            --primary: #1a237e; /* Royal Blue */
-            --secondary: #ffd700; /* Gold */
-            --accent: #c5cae9;
-            --text: #333;
-            --bg: #f4f6f8;
+            --primary: #0F3D81; /* Royal Blue */
+            --accent: #D4AF37; /* Gold */
+            --bg-color: #f4f7f6;
+            --text-dark: #333;
             --white: #ffffff;
-            --danger: #d32f2f;
-            --success: #388e3c;
+            --danger: #dc3545;
+            --success: #28a745;
+            --gray: #e9ecef;
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { margin: 0; background-color: var(--bg); color: var(--text); }
-
-        /* --- UTILITY & ANIMATION --- */
+        body { margin: 0; background-color: var(--bg-color); color: var(--text-dark); }
+        
+        /* Utility */
         .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- LOGIN SCREEN --- */
-        #login-screen {
-            height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            background: linear-gradient(135deg, var(--primary), #000051);
-            color: var(--white);
-        }
-        .login-box {
-            background: rgba(255,255,255,0.1); padding: 2rem;
-            border-radius: 15px; border: 2px solid var(--secondary);
-            backdrop-filter: blur(10px); text-align: center; width: 90%; max-width: 400px;
-        }
-        .login-input {
-            padding: 12px; width: 100%; margin: 10px 0; border-radius: 5px; border: none; font-size: 1.1rem; text-align: center;
-        }
-        .btn-gold {
-            background: var(--secondary); color: var(--primary); font-weight: bold;
-            border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer;
-            font-size: 1rem; transition: transform 0.2s; width: 100%;
-        }
-        .btn-gold:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--secondary); }
-
-        /* --- QUIZ LAYOUT --- */
-        #quiz-container { max-width: 1200px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; }
+        .text-center { text-align: center; }
         
         /* Header */
-        header {
-            background: var(--primary); color: var(--white); padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 4px solid var(--secondary); box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .timer-badge {
-            background: var(--secondary); color: var(--primary); padding: 5px 15px;
-            border-radius: 20px; font-weight: bold; font-size: 1.1rem;
-        }
+        .app-header { background: var(--primary); color: var(--accent); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .app-header h1 { margin: 0; font-size: 1.2rem; }
+        .timer { font-size: 1.2rem; font-weight: bold; background: var(--white); color: var(--primary); padding: 5px 15px; border-radius: 20px; }
 
-        /* Main Content Area (Split View) */
-        main {
-            flex: 1; display: flex; gap: 20px; padding: 20px; overflow: hidden;
-        }
+        /* Login Screen */
+        .login-container { height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--primary), #1a56b0); }
+        .login-card { background: var(--white); padding: 40px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 5px solid var(--accent); }
+        .login-card h2 { color: var(--primary); margin-bottom: 20px; }
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid var(--gray); border-radius: 8px; outline: none; transition: border 0.3s; }
+        .input-group input:focus { border-color: var(--primary); }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--primary); font-weight: bold; user-select: none; }
+        .btn-start { background: var(--accent); color: var(--primary); border: none; padding: 12px 30px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; transition: transform 0.2s; }
+        .btn-start:hover { transform: scale(1.05); }
 
-        /* Wacana Panel (Left) */
-        .wacana-panel {
-            flex: 1; background: var(--white); padding: 20px; border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow-y: auto;
-            border-left: 5px solid var(--primary);
-        }
-        .wacana-badge {
-            background: var(--primary); color: var(--white); padding: 4px 10px;
-            border-radius: 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
-            margin-bottom: 10px; display: inline-block;
-        }
+        /* Layout Main Exam */
+        .exam-layout { display: flex; height: calc(100vh - 60px); }
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
+        .sidebar { width: 300px; background: var(--white); border-left: 2px solid var(--gray); padding: 20px; overflow-y: auto; transition: transform 0.3s; }
 
-        /* Question Panel (Right) */
-        .question-panel {
-            flex: 1; background: var(--white); padding: 20px; border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-y: auto; display: flex; flex-direction: column;
-        }
+        /* Question Card */
+        .question-card { background: var(--white); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 80px; }
+        .question-header { background: var(--gray); padding: 15px 20px; font-weight: bold; color: var(--primary); display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); }
         
-        .q-meta { display: flex; justify-content: space-between; margin-bottom: 15px; color: #666; font-size: 0.9rem; }
-        .q-text { font-size: 1.15rem; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
+        /* Sticky Wacana */
+        .wacana-box { position: sticky; top: 0; background: #fffbe6; padding: 15px 20px; border-bottom: 2px solid var(--accent); z-index: 10; font-size: 0.95rem; line-height: 1.6; max-height: 250px; overflow-y: auto; }
+        .wacana-title { font-weight: bold; color: var(--primary); margin-bottom: 10px; }
         
+        .question-body { padding: 20px; font-size: 1.1rem; line-height: 1.6; }
+        .img-question { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; }
+
         /* Options */
-        .options-list { list-style: none; padding: 0; }
-        .option-item {
-            background: #f8f9fa; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px;
-            border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
-        }
-        .option-item:hover { background: var(--accent); border-color: var(--primary); }
-        .option-item.selected { background: #e8eaf6; border-color: var(--primary); border-left: 5px solid var(--primary); }
-        .option-input { margin-right: 15px; transform: scale(1.2); }
+        .option-label { display: block; padding: 12px 15px; margin-bottom: 10px; background: var(--gray); border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .option-label:hover { background: #d3d9df; }
+        .option-label input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+        .option-label.selected { background: #e6f0ff; border-color: var(--primary); }
 
-        /* Image Placeholder Style */
-        .img-placeholder {
-            background: #eee; border: 2px dashed #aaa; color: #555;
-            padding: 20px; text-align: center; margin: 10px 0; border-radius: 8px; font-style: italic;
-        }
+        /* Table Benar Salah */
+        .bs-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .bs-table th, .bs-table td { border: 1px solid #ccc; padding: 12px; text-align: left; }
+        .bs-table th { background: var(--primary); color: var(--white); }
+        .bs-table td:nth-child(2), .bs-table td:nth-child(3) { text-align: center; width: 100px; }
+        .bs-radio { transform: scale(1.3); cursor: pointer; }
 
-        /* Footer / Navigation */
-        .quiz-footer {
-            margin-top: auto; padding-top: 20px; display: flex; justify-content: space-between;
-        }
-        .btn-nav {
-            padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
-        }
-        .btn-check { background: var(--primary); color: white; }
-        .btn-next { background: var(--secondary); color: var(--primary); }
+        /* Navigation Buttons */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); padding: 15px 20px; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; z-index: 50; }
+        .main-content .bottom-nav { right: 300px; } /* Adjust for sidebar */
+        .btn-nav { padding: 10px 25px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .btn-prev { background: var(--gray); color: var(--text-dark); }
+        .btn-next { background: var(--primary); color: var(--white); }
+        .btn-submit { background: var(--danger); color: var(--white); }
 
-        /* --- MODAL (FEEDBACK) --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white; width: 90%; max-width: 500px; padding: 25px;
-            border-radius: 15px; text-align: center; position: relative;
-            border-top: 10px solid var(--primary);
-        }
-        .feedback-title { font-size: 1.5rem; margin-bottom: 10px; }
-        .correct-color { color: var(--success); }
-        .wrong-color { color: var(--danger); }
-        .explanation-box { background: #f0f0f0; padding: 15px; margin: 15px 0; text-align: left; border-radius: 8px; font-size: 0.95rem; }
+        /* CBT Grid Sidebar */
+        .grid-header { font-weight: bold; margin-bottom: 15px; color: var(--primary); text-align: center; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        .grid-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .grid-item { padding: 10px 0; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-weight: bold; cursor: pointer; background: var(--white); transition: 0.2s; }
+        .grid-item:hover { background: var(--gray); }
+        .grid-item.answered { background: var(--success); color: var(--white); border-color: var(--success); }
+        .grid-item.active { background: var(--primary); color: var(--accent); border-color: var(--accent); }
+        .grid-item.flagged { border-bottom: 4px solid var(--accent); }
 
-        /* Mobile Responsive */
+        /* Mobile Drawer Toggle */
+        .mobile-drawer-btn { display: none; background: var(--accent); color: var(--primary); border: none; padding: 8px 15px; font-weight: bold; border-radius: 20px; cursor: pointer; }
+        
+        /* Result Screen */
+        .result-container { padding: 40px; text-align: center; max-width: 600px; margin: 40px auto; background: var(--white); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--primary); }
+        .score-circle { width: 150px; height: 150px; border-radius: 50%; border: 8px solid var(--success); display: flex; justify-content: center; align-items: center; font-size: 48px; font-weight: bold; color: var(--primary); background: #fdfbf0; margin: 0 auto 20px; }
+        .review-box { margin-top: 20px; text-align: left; }
+        .review-item { padding: 15px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 15px; background: #fff; }
+        .review-item.correct { border-left: 5px solid var(--success); }
+        .review-item.wrong { border-left: 5px solid var(--danger); }
+        .pembahasan { background: #eef2f7; padding: 15px; border-radius: 6px; margin-top: 10px; font-size: 0.95rem; border: 1px dashed var(--primary); line-height: 1.6; }
+
+        /* Form Mini Sertifikat */
+        .cert-generator { background: #eef2f7; padding: 25px 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #cdd4dc; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+        .cert-generator input { width: 100%; padding: 14px; font-size: 16px; border: 2px solid var(--gray); border-radius: 8px; outline: none; margin-bottom: 15px; text-align: center; font-weight: bold; }
+        .cert-generator input:focus { border-color: var(--primary); }
+        
+        /* Tampilan Mini Sertifikat */
+        .cert-box { background: linear-gradient(135deg, #ffffff, #fdfbf0); border: 6px double var(--accent); padding: 30px 20px; border-radius: 8px; margin-bottom: 25px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; }
+        .cert-box h3 { color: var(--primary); font-size: 1.6rem; margin-top: 0; margin-bottom: 10px; letter-spacing: 2px; }
+        .cert-text { font-size: 1.1rem; color: #444; line-height: 1.6; margin: 15px 0; }
+        .cert-name { font-size: 1.8rem; font-weight: 900; color: var(--primary); text-transform: uppercase; display: block; margin: 15px 0; border-bottom: 2px dashed var(--accent); padding-bottom: 10px; letter-spacing: 1px; }
+
+        /* Affiliate Section */
+        .affiliate-section { text-align: left; background: var(--white); padding: 25px; border-radius: 8px; border: 1px solid var(--gray); margin-top: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .sugesti-teks { font-style: italic; color: #555; margin-bottom: 20px; text-align: center; font-size: 1.05rem; background: #fffbe6; padding: 10px; border-radius: 6px; border-left: 4px solid var(--accent); }
+        .affiliate-item { display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
+        .affiliate-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .affiliate-item img { width: 75px; height: 100px; object-fit: cover; margin-right: 15px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-shopee { background: linear-gradient(90deg, #ee4d2d, #ff7337); color: white; text-decoration: none; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; display: inline-block; margin-top: 8px; transition: 0.2s; box-shadow: 0 2px 5px rgba(238, 77, 45, 0.3); }
+        .btn-shopee:hover { background: linear-gradient(90deg, #d73a1e, #ee4d2d); transform: translateY(-2px); }
+
+        /* Voucher Box (NEW) */
+        .voucher-box { background: #fff8e1; border: 2px dashed #ffb300; padding: 15px; border-radius: 8px; text-align: center; margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
+        .voucher-title { color: #d84315; font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .voucher-title span { font-size: 1.5rem; animation: tada 1.5s infinite; }
+        .voucher-desc { font-size: 0.9rem; color: #555; margin-bottom: 10px; }
+        .btn-voucher { background: #ffb300; color: #fff; text-decoration: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; transition: 0.2s; box-shadow: 0 3px 6px rgba(255, 179, 0, 0.3); text-shadow: 1px 1px 1px rgba(0,0,0,0.2); }
+        .btn-voucher:hover { background: #ffa000; transform: scale(1.05); }
+
+        /* Cross-Sell CTA Belajar Sukses (NEW) */
+        .cross-sell-section { background: linear-gradient(135deg, var(--primary), #1a56b0); padding: 30px 20px; border-radius: 12px; text-align: center; color: white; box-shadow: 0 8px 20px rgba(15, 61, 129, 0.2); margin-top: 30px; border-bottom: 5px solid var(--accent); }
+        .cross-sell-section h3 { margin-top: 0; font-size: 1.5rem; color: var(--accent); }
+        .cross-sell-section p { font-size: 1rem; line-height: 1.6; margin-bottom: 20px; opacity: 0.9; }
+        
+        /* Button Animation for Cross-Sell */
+        @keyframes pulse-btn {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3); }
+        }
+        @keyframes tada {
+            0% { transform: scale(1); }
+            10%, 20% { transform: scale(0.9) rotate(-3deg); }
+            30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+            40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+            100% { transform: scale(1); }
+        }
+        
+        .btn-cross-sell { background: var(--accent); color: var(--primary); text-decoration: none; padding: 15px 25px; border-radius: 50px; font-size: 1.1rem; font-weight: 900; display: inline-block; transition: background 0.3s; border: none; width: 90%; animation: pulse-btn 2s infinite; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-cross-sell:hover { background: #e6c855; color: var(--primary); animation: none; transform: scale(1.02); }
+
+        /* Footer */
+        .footer { text-align: center; padding: 10px; background: var(--primary); color: var(--white); font-size: 0.8rem; position: fixed; bottom: 0; width: 100%; z-index: 1000; }
+
         @media (max-width: 768px) {
-            main { flex-direction: column; }
-            .wacana-panel { max-height: 200px; flex: none; }
-            .question-panel { flex: 1; }
+            .exam-layout { flex-direction: column; }
+            .sidebar { position: fixed; top: 60px; right: -100%; height: calc(100vh - 60px); z-index: 900; box-shadow: -5px 0 15px rgba(0,0,0,0.1); width: 80%; max-width: 320px; }
+            .sidebar.open { right: 0; }
+            .main-content .bottom-nav { right: 0; }
+            .mobile-drawer-btn { display: block; }
+            .app-header h1 { font-size: 1rem; }
+            .cert-name { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
 
-<script>
-    // --- KONFIGURASI USER ---
-    const JUDUL_KUIS = "SUKSES TKA 2026 - BAHASA INDONESIA";
-    const PIN_AKSES = "123456";
-    const WAKTU_MENIT = 70;
-    const TARGET_TOTAL_SOAL = 30; // Global Limit
-    const MAX_SOAL_PER_CLUSTER = 2; // Sampling per wacana (1-2 soal)
-    const MIN_SOAL_PER_CLUSTER = 1;
-
-    // --- DATA MENTAH USER (PASTE DI SINI) ---
-    const RAW_DATA = `
-###
-
-[WACANA: Inovasi Kesehatan dan Lingkungan] Di era modern, teknologi kesehatan berkembang sangat pesat untuk mendukung kualitas hidup manusia. Salah satu penemuan terbaru adalah alat pemurni udara portabel yang dirancang khusus untuk penderita gangguan pernapasan. Alat ini membantu proses respirasi pasien menjadi lebih lancar dengan menyaring debu dan virus mikroskopis. Para ahli medis sangat merekomendasikan alat ini digunakan di ruang isolasi rumah sakit.
-Selain kesehatan, teknologi juga merambah ke bidang pelestarian lingkungan. Sebuah perusahaan rintisan menciptakan robot pemilah sampah otomatis. Robot ini sangat canggih karena menggunakan sensor optik untuk memisahkan plastik, logam, dan organik dalam hitungan detik. Penggunaan robot ini diharapkan dapat mengurangi tumpukan sampah di tempat pembuangan akhir. Namun, upaya ini tidak akan berhasil tanpa kesadaran masyarakat. Kita harus membiasakan diri membuang limbah pada tempatnya agar ... lingkungan tetap terjaga. Keseimbangan antara kemajuan teknologi dan kepedulian alam adalah kunci masa depan bumi.
-[Tipe: PG] Berdasarkan teks di atas, apa makna istilah medis "respirasi" yang dicetak miring? | Proses pencernaan makanan, Proses pernapasan atau pertukaran gas, Proses peredaran darah, Proses penyembuhan luka | B | Respirasi adalah istilah medis untuk pernapasan.
-[Tipe: PG] Perhatikan kata "canggih" yang digarisbawahi pada paragraf kedua. Sinonim yang paling tepat untuk kata tersebut dalam konteks teknologi adalah... | Sederhana, Modern, Rumit, Kuno | B | Canggih bersinonim dengan modern atau mutakhir.
-[Tipe: PG] Kalimat rumpang pada akhir paragraf kedua berbunyi: "Kita harus membiasakan diri membuang limbah pada tempatnya agar ... lingkungan tetap terjaga." Kata istilah yang tepat untuk melengkapi kalimat tersebut adalah... | Ekosistem, Populasi, Reboisasi, Abrasi | A | Ekosistem adalah istilah yang tepat berkaitan dengan keseimbangan lingkungan hidup.
-###
-###
-
-[WACANA: Petualangan di Hutan Larangan] Raka melangkah hati-hati memasuki Hutan Larangan. Ia dikenal sebagai anak yang pemberani dan tidak mudah menyerah, berbeda dengan adiknya yang penakut. Suasana di dalam hutan sangat mencekam. Kabut tebal menyelimuti pepohonan besar yang menjulang tinggi, dan suara burung hantu terdengar bersahut-sahutan, menandakan hari mulai gelap. Raka tidak gentar, ia terus berjalan mencari benda pusaka yang hilang.
-Di tengah perjalanan, Raka melihat seekor hewan aneh bersembunyi di balik semak. Hewan itu memiliki tubuh besar, berkulit tebal warna abu-abu, dan memiliki belalai panjang yang menjuntai. Raka segera memotretnya. Tak lama kemudian, ia menemukan sebuah benda kayu di bawah pohon beringin. "Aku punya empat kaki, tapi tidak bisa berjalan. Orang-orang duduk di atasku," gumam Raka membaca tulisan pada benda itu. Ia tersenyum karena berhasil menebaknya.
-[Tipe: PG] Antonim dari kata sifat "pemberani" yang mendeskripsikan tokoh Raka dalam cerita adalah... | Penakut, Pemarah, Pemalu, Pendiam | A | Antonim pemberani adalah penakut.
-[Tipe: PG] [IMG: Gambar 4 Hewan: A. Harimau, B. Gajah, C. Jerapah, D. Rusa] Berdasarkan deskripsi hewan yang dilihat Raka (tubuh besar, kulit abu-abu, belalai panjang), manakah gambar hewan yang dimaksud? | Gambar A, Gambar B, Gambar C, Gambar D | B | Ciri fisik belalai panjang merujuk pada Gajah.
-[Tipe: BS] Tentukan Benar atau Salah pernyataan berikut berdasarkan teka-teki benda yang ditemukan Raka ("Punya 4 kaki, untuk duduk"): | Benda tersebut adalah Meja (Salah), Benda tersebut adalah Kursi (Benar) | - | Teka-teki merujuk pada kursi.
-[Tipe: PG] Berdasarkan deskripsi suasana "kabut tebal, pepohonan besar, suara burung hantu", di manakah latar tempat cerita tersebut terjadi? | Di sebuah gua, Di tepi pantai, Di tengah hutan, Di taman kota | C | Deskripsi hutan larangan sesuai dengan ciri-ciri tersebut.
-###
-###
-
-[WACANA: Tertib Berlalu Lintas] Transportasi umum kini semakin nyaman digunakan. Pemerintah menyediakan bus kota dengan fasilitas lengkap seperti pendingin ruangan dan kursi prioritas. [IMG: Infografis Transportasi] Perhatikan infografis di samping! Terdapat istilah "Transisi Moda" yang artinya perpindahan dari kendaraan pribadi ke umum, dan "Emisi Gas Buang" yang berarti sisa pembakaran mesin.
-Untuk menjaga keselamatan, penumpang wajib mengikuti prosedur. (1) Tunggulah bus di halte yang sudah ditentukan. (2) Siapkan kartu uang elektronik Anda. (3) Tempelkan kartu pada mesin pembaca saat masuk. (4) Duduklah dengan tertib dan jangan makan di dalam bus.
-Selain itu, bagi pengendara sepeda motor, keselamatan juga nomor satu. Cara Memakai Helm yang Benar:
-Masukkan kepala ke dalam helm.
-Pastikan helm tidak terlalu longgar.
-Klik pengikat dagu sampai berbunyi.
-Kencangkan tali agar helm tidak lepas.
-[Tipe: PGK] [IMG: Infografis Transportasi] Berdasarkan wacana dan infografis, manakah pasangan kata teknis dan penjelasan yang BENAR? | Transisi Moda = Perpindahan jenis transportasi, Emisi Gas Buang = Asap sisa pembakaran mesin, Prioritas = Tempat duduk untuk semua orang, Halte = Tempat memperbaiki bus | A, B | Sesuai definisi dalam teks.
-[Tipe: PGK] Manakah kata kerja imperatif (perintah) yang terdapat dalam teks prosedur di atas? | Tunggulah, Masukkan, Nyaman, Fasilitas | A, B | Kata berakhiran -lah dan -kan (tunggulah, masukkan) adalah imperatif.
-[Tipe: PG] Berikut adalah langkah-langkah acak menanam bunga: (1) Masukkan tanah ke dalam pot. (2) Siapkan pot dan bibit bunga. (3) Siram dengan air secukupnya. (4) Tanam bibit bunga di tengah pot. Urutan langkah prosedur yang tepat adalah... | (2)-(1)-(4)-(3), (1)-(2)-(3)-(4), (2)-(4)-(1)-(3), (4)-(1)-(2)-(3) | A | Logika prosedur: Siapkan -> Isi tanah -> Tanam -> Siram.
-###
-###
-
-[WACANA: Menelusuri Jejak Budaya dan Alam] Siswa kelas 6 sedang berkunjung ke Museum Nasional. Di ruang kebudayaan, mereka melihat berbagai alat musik tradisional. Pemandu museum menunjuk sebuah alat musik dari Jawa Barat yang terbuat dari bambu. Alat ini dimainkan dengan cara digoyangkan hingga menghasilkan bunyi yang khas. "Ini adalah warisan budaya yang harus dijaga," kata pemandu.
-Selanjutnya, mereka masuk ke ruang sejarah. Di dinding terpampang foto seorang pahlawan wanita dari Aceh. Ia berjuang melawan penjajah Belanda dengan gigih meskipun usianya sudah senja. Ia dikenal sebagai pemimpin perang gerilya yang tangguh.
-Setelah keluar dari museum, tiba-tiba langit menjadi gelap dan angin bertiup kencang membentuk pusaran corong yang turun dari awan ke tanah. Semua orang panik melihat fenomena alam tersebut dan segera mencari tempat berlindung yang aman.
-[Tipe: PG] [IMG: Gambar 4 Alat Musik: A. Gitar, B. Angklung, C. Suling, D. Gendang] Berdasarkan deskripsi "terbuat dari bambu dan dimainkan dengan cara digoyangkan", manakah gambar alat musik yang sesuai? | Gambar A, Gambar B, Gambar C, Gambar D | B | Angklung dimainkan dengan digoyangkan.
-[Tipe: PG] [IMG: Foto 4 Pahlawan: A. Kartini, B. Cut Nyak Dien, C. Dewi Sartika, D. Fatmawati] Berdasarkan deskripsi "pahlawan wanita dari Aceh, pemimpin perang gerilya, usia senja", siapakah tokoh yang dimaksud? | Foto A, Foto B, Foto C, Foto D | B | Cut Nyak Dien adalah pahlawan wanita Aceh yang memimpin gerilya di usia tua.
-[Tipe: PG] Fenomena alam "angin kencang membentuk pusaran corong dari awan ke tanah" yang disebutkan dalam teks disebut... | Gempa bumi, Tsunami, Puting beliung, Banjir bandang | C | Deskripsi tersebut sesuai dengan angin puting beliung.
-###
-###
-
-[WACANA: Ekosistem Sawah dan Sang Ilmuwan] Di sebuah ekosistem sawah, kehidupan berjalan sesuai hukum alam. Padi tumbuh subur berkat sinar matahari. Belalang memakan daun padi yang hijau. Katak kemudian memburu belalang tersebut untuk dimakan. Jika populasi katak punah, maka jumlah belalang akan meningkat pesat dan merusak panen petani. Namun, di sana juga ada ular sawah yang siap memangsa katak.
-[Tipe: PG] [IMG: Diagram Rantai Makanan Kosong: Padi -> ... -> Katak -> Ular] Berdasarkan teks, hewan apakah yang tepat untuk mengisi kotak kosong pada diagram rantai makanan tersebut? | Tikus, Burung Elang, Belalang, Ayam | C | Teks menyebutkan: Padi dimakan Belalang, Belalang dimakan Katak.
-###
-###
-[IMG: Foto B.J. Habibie] Berbicara tentang ilmu pengetahuan, kita teringat pada Bapak B.J. Habibie. Beliau lahir di Parepare pada tahun 1936. Pada masa mudanya, beliau menempuh pendidikan di Jerman dan bekerja keras dalam industri pesawat terbang. Puncak karirnya adalah ketika berhasil membuat pesawat N-250 Gatotkaca yang membanggakan Indonesia. Beliau kemudian menjabat sebagai Presiden RI ke-3 sebelum akhirnya wafat pada tahun 2019.
-[Tipe: BS] [IMG: Garis Waktu/Timeline Habibie Kosong] Perhatikan lini masa kehidupan B.J. Habibie. Tentukan kebenaran isian berikut: | Tahun 1936: Habibie Wafat (Salah), Masa Muda: Kuliah di Jerman (Benar), Puncak Karir: Membuat Pesawat N-250 (Benar) | - | Habibie lahir 1936, bukan wafat. Kuliah di Jerman dan membuat N-250 adalah fakta dalam teks.
-###
-###
-
-[WACANA: Ekosistem dan Pengamatan Ilmiah] Siswa kelas 6 melakukan pengamatan di area persawahan dekat sekolah. Mereka melihat hubungan makan dan dimakan yang unik. Padi tumbuh subur dimakan oleh belalang. Belalang kemudian menjadi mangsa katak. Di ujung sawah, terlihat seekor ular sedang mengintai katak tersebut. Sayangnya, populasi elang yang biasa memangsa ular semakin sedikit karena perburuan liar.
-Kelompok siswa bernama "Tim Biologi" kemudian melakukan percobaan pertumbuhan tanaman kacang hijau di laboratorium sekolah. Mereka mencatat tinggi tanaman setiap dua hari sekali selama seminggu untuk melihat pengaruh cahaya matahari. Selain itu, Guru IPA menjelaskan tentang klasifikasi sampah yang ditemukan di sekitar sawah. Sampah dibagi menjadi tiga jenis utama:
-Organik: Sisa makanan, daun kering, ranting.
-Anorganik: Plastik, kaleng, styrofoam.
-B3 (Bahan Berbahaya dan Beracun): Baterai bekas, limbah medis.
-[Tipe: PG] [IMG: Diagram Rantai Makanan: Padi -> Belalang -> (X) -> Ular] Perhatikan diagram rantai makanan yang rumpang di atas. Berdasarkan wacana, hewan apakah yang tepat untuk mengisi posisi (X)? | Tikus, Ayam, Katak, Burung Pipit | C | Sesuai teks: Belalang dimangsa katak, katak dimangsa ular (Indikator 14).
-[Tipe: PGK] [IMG: Tabel Kosong Data Pertumbuhan] Siswa mencatat data: Hari ke-2 (2 cm), Hari ke-4 (5 cm), dan Hari ke-6 (8 cm). Manakah baris data yang tepat untuk melengkapi tabel pengamatan tersebut? | Hari 2: 2cm, Hari 4: 5cm, Hari 6: 8cm | Benar semua | Data sesuai dengan deskripsi pengamatan Tim Biologi (Indikator 16).
-[Tipe: PG] [IMG: Bagan Pohon Klasifikasi Sampah] Berdasarkan teks eksposisi di atas, manakah bagan klasifikasi yang paling tepat untuk mengelompokkan jenis sampah? | Sampah -> (Basah, Kering), Sampah -> (Daur ulang, Residu), Sampah -> (Organik, Anorganik, B3), Sampah -> (Plastik, Kertas, Logam) | C | Teks mengklasifikasikan sampah menjadi Organik, Anorganik, dan B3 (Indikator 18).
-###
-###
-[WACANA: Kisah Persahabatan di Hutan Jati] Di sebuah hutan jati, hidup seekor Rusa yang sombong karena tanduknya yang indah. Ia sering mengejek Kura-kura yang berjalan lambat. Suatu hari, Kura-kura menantang Rusa untuk lomba lari menuju sungai. Rusa tertawa meremehkan, "Kau pasti kalah!".
-Saat lomba dimulai, Rusa melesat cepat dan meninggalkan Kura-kura jauh di belakang. Karena merasa aman, Rusa memutuskan tidur siang di bawah pohon rindang. Tanpa disadari, Kura-kura terus berjalan pelan namun pasti. Saat Rusa terbangun, ia kaget melihat Kura-kura sudah hampir mencapai garis finis. Rusa berlari sekuat tenaga, tetapi terlambat. Kura-kura memenangkan lomba. Rusa pun merasa malu dan meminta maaf atas kesombongannya. Sejak saat itu, mereka bersahabat baik.
-[Tipe: PG] Berikut adalah ringkasan cerita yang rumpang: "Rusa yang sombong menantang Kura-kura lomba lari. Rusa memimpin tapi kemudian tertidur karena meremehkan lawan. (...) Akhirnya Rusa kalah dan meminta maaf." Kalimat yang tepat untuk melengkapi ringkasan tersebut adalah... | Rusa terbangun dan mengejar Kura-kura tetapi terlambat, Kura-kura menyerah di tengah jalan, Rusa membiarkan Kura-kura menang, Hewan lain menertawakan Rusa | A | Melengkapi alur cerita sesuai ringkasan (Indikator 17).
-[Tipe: PG] Siapakah tokoh yang melakukan tindakan "meminta maaf" di akhir cerita? | Kura-kura, Rusa, Penonton, Kelinci | B | Rusa meminta maaf karena kesombongannya (Indikator 20).
-[Tipe: BS] Berdasarkan watak tokoh dalam cerita, tentukan kebenaran pernyataan berikut: | Rusa memiliki watak rendah hati (Salah), Kura-kura memiliki watak pantang menyerah (Benar) | - | Rusa sombong, Kura-kura gigih/pantang menyerah.
-###
-###
-[WACANA: Mengenang Jasa Pahlawan Pendidikan] Ki Hajar Dewantara adalah Bapak Pendidikan Nasional Indonesia. Beliau lahir di Yogyakarta pada tanggal 2 Mei 1889 dengan nama Raden Mas Soewardi Soerjaningrat. Pada tahun 1913, beliau diasingkan ke Belanda karena tulisannya yang mengkritik pemerintah kolonial. Sekembalinya ke tanah air, beliau mendirikan Taman Siswa pada tanggal 3 Juli 1922 sebagai tempat belajar bagi rakyat pribumi. Beliau wafat pada 26 April 1959.
-Pemerintah menetapkan tanggal kelahirannya sebagai Hari Pendidikan Nasional. Berita di koran lokal melaporkan: "Upacara peringatan Hardiknas tahun ini dilaksanakan serentak pada hari Selasa, 2 Mei 2023, di alun-alun kota dengan khidmat." Sementara itu, di sekolah Budi, terpampang jadwal ujian sejarah yang berkaitan dengan pahlawan nasional. Siswa diminta memperhatikan jadwal agar tidak terlambat.
-[Tipe: PG] [IMG: Lini Masa/Timeline Kosong: 1889 (Lahir) -> 1913 (X) -> 1922 (Mendirikan Taman Siswa) -> 1959 (Wafat)] Berdasarkan teks biografi, peristiwa apa yang tepat untuk mengisi kotak tahun 1913 (X) pada lini masa tersebut? | Menjadi Menteri Pendidikan, Diasingkan ke Belanda, Mendirikan Budi Utomo, Proklamasi Kemerdekaan | B | Teks menyebutkan tahun 1913 beliau diasingkan.
-[Tipe: PG] Berdasarkan teks berita di paragraf kedua, kapan peristiwa upacara peringatan Hardiknas dilaksanakan? | 3 Juli 1922, 26 April 1959, Selasa 2 Mei 2023, Minggu 2 Mei 2023 | C | Informasi tersurat "Selasa, 2 Mei 2023".
-[Tipe: PGK] [IMG: Tabel Jadwal Pelajaran: Senin (MTK), Selasa (B.Indo), Rabu (IPA), Kamis (Sejarah)] Budi ingin mengikuti ujian Sejarah sesuai wacana. Berdasarkan tabel jadwal di samping, pada hari apa Budi harus bersiap? | Senin, Kamis, Selasa, Rabu | B | Tabel menunjukkan Sejarah ada di hari Kamis.
-###
-###
-[WACANA: Gebyar Seni Sekolah Dasar] Sekolah Dasar Merah Putih akan mengadakan pentas seni tahunan. Panitia menempelkan poster besar di gerbang sekolah. ISI POSTER: "Lomba Melukis Tong Sampah. Hadiah Menarik! Syarat Pendaftaran: Membawa peralatan lukis sendiri dan mendaftar sebelum tanggal 10 Agustus."
-Siti, salah satu siswa, mewawancarai Kepala Sekolah mengenai kegiatan ini. "Mengapa sekolah mewajibkan siswa melukis tong sampah, Pak?" tanya Siti. "Kami ingin siswa tidak hanya kreatif, tetapi juga semakin peduli pada kebersihan lingkungan sekolah," jawab Bapak Kepala Sekolah dengan ramah.
-Setelah memenangkan lomba tersebut, Siti mengirim surat kepada neneknya di kampung. "Nenek sayang, Siti menang lomba melukis! Siti senang sekali. Liburan nanti Siti akan bawa pialanya ke rumah Nenek ya."
-[Tipe: PG] [IMG: Gambar Poster Lomba] Berdasarkan poster kegiatan di atas, apa syarat pendaftaran yang harus dipenuhi peserta? | Membayar biaya pendaftaran, Membawa peralatan lukis sendiri, Membawa tong sampah sendiri, Datang setelah tanggal 10 Agustus | B | Tertulis jelas di poster "Membawa peralatan lukis sendiri".
-[Tipe: PG] Berdasarkan teks wawancara, apa alasan Kepala Sekolah mengadakan lomba melukis tong sampah? | Agar sekolah terlihat mewah, Untuk menjual tong sampah, Agar siswa kreatif dan peduli kebersihan, Karena kehabisan dana sekolah | C | Jawaban narasumber: "...siswa tidak hanya kreatif, tetapi juga semakin peduli pada kebersihan...".
-[Tipe: BS] Berdasarkan surat pribadi Siti, tentukan kebenaran pernyataan mengenai tujuan surat tersebut: | Tujuan surat adalah meminta uang kepada nenek (Salah), Tujuan surat adalah mengabarkan kemenangan lomba (Benar) | - | Siti mengabarkan ia menang lomba dan akan membawa piala.
-###
-###
-[WACANA: Energi Bersih untuk Masa Depan] (Teks 1: Eksposisi) Energi terbarukan menjadi solusi utama untuk mengatasi krisis lingkungan global. Penggunaan panel surya di rumah-rumah penduduk kini semakin digalakkan oleh pemerintah. Sinar matahari yang melimpah di negara tropis seperti Indonesia merupakan potensi besar yang belum dimanfaatkan secara maksimal. Selain ramah lingkungan, penggunaan listrik tenaga surya juga dapat menghemat pengeluaran bulanan rumah tangga dalam jangka panjang.
-(Teks 2: Argumentasi & Pidato) Banyak pihak mendukung peralihan ke kendaraan listrik karena berbagai alasan kuat. Pertama, kendaraan listrik tidak menghasilkan emisi gas buang yang mencemari udara. Kedua, suara mesinnya jauh lebih halus sehingga mengurangi polusi suara di perkotaan. Dalam pidato peresmian pabrik mobil listrik, Bapak Gubernur menyampaikan pesan tegas. "Bapak dan Ibu sekalian, polusi udara di kota kita adalah selimut hitam yang perlahan mencekik napas anak cucu kita. Oleh karena itu, mari kita beralih ke energi yang lebih bersih demi langit yang biru kembali."
-[Tipe: PG] Perhatikan paragraf pertama pada Teks 1. Kalimat utama paragraf tersebut adalah... | Energi terbarukan menjadi solusi utama untuk mengatasi krisis lingkungan global, Penggunaan panel surya semakin digalakkan, Indonesia adalah negara tropis, Listrik tenaga surya menghemat pengeluaran | A | Kalimat utama terletak di awal paragraf (deduktif) yang menjadi inti pembahasan.
-[Tipe: PGK] Berdasarkan Teks 2 (Argumentasi), manakah yang termasuk gagasan pendukung mengapa kita harus beralih ke kendaraan listrik? | Harganya sangat murah, Tidak menghasilkan emisi gas buang, Suara mesin lebih halus, Bentuknya lebih bagus | B, C | Gagasan pendukung terdapat pada kalimat kedua dan ketiga paragraf 2.
-[Tipe: PG] Pada kutipan pidato, Bapak Gubernur menggunakan ungkapan "selimut hitam". Apa maksud dari majas metafora tersebut? | Awan mendung yang akan hujan, Kain penutup mobil, Polusi udara yang tebal dan berbahaya, Asap pabrik yang wangi | C | "Selimut hitam" adalah kiasan untuk polusi/asap tebal yang menutupi kota.
-###
-###
-[WACANA: Perubahan Hati Sang Saudagar] Di sebuah desa terpencil, tinggallah Pak Tono, seorang saudagar beras yang sangat kaya namun kikir. Ia tidak pernah mau ikut kerja bakti atau menyumbang untuk warga miskin. "Untuk apa aku membantu mereka? Hartaku adalah hasil kerja kerasku sendiri!" ketus Pak Tono saat Pak RT datang meminta sumbangan perbaikan jembatan. Warga pun akhirnya menjauhi Pak Tono.
-Suatu malam, hujan deras menyebabkan gudang beras Pak Tono banjir. Pak Tono panik dan berteriak minta tolong. Tanpa ragu, para tetangga datang berbondong-bondong menyelamatkan karung beras Pak Tono. Pak Tono tertegun melihat kebaikan mereka. Ia merasa malu atas sikapnya selama ini. Esoknya, Pak Tono membagikan beras kepada seluruh warga dan berjanji akan aktif dalam kegiatan desa. Ia menyadari bahwa kekayaan tidak berarti tanpa kebersamaan.
-[Tipe: PG] Apa amanat atau pesan moral yang tersirat dalam cerita tersebut? | Kita harus bekerja keras agar kaya raya, Janganlah menjadi orang yang sombong dan kikir karena kita membutuhkan orang lain, Hujan deras bisa menyebabkan banjir, Sebaiknya kita menyimpan beras di tempat tinggi | B | Pesan moral didapat dari perubahan sikap tokoh akibat peristiwa yang dialaminya.
-[Tipe: PG] Berdasarkan dialog "Untuk apa aku membantu mereka? Hartaku adalah hasil kerja kerasku sendiri!", bagaimana watak Pak Tono pada awal cerita? | Dermawan dan ramah, Sombong dan egois, Pemalu dan pendiam, Bijaksana dan adil | B | Dialog tersebut menunjukkan ketidakpedulian dan kesombongan.
-[Tipe: BS] Tentukan kebenaran pernyataan berikut mengenai nilai sosial dan perubahan tokoh dalam cerita: | Nilai sosial yang tergambar adalah gotong royong warga membantu Pak Tono (Benar), Pak Tono berubah menjadi baik karena ingin dipuji warga (Salah) | - | Pak Tono berubah karena merasa malu dan sadar, bukan ingin dipuji. Warga menunjukkan gotong royong.
-###
-###
-[WACANA: Surat dari Sahabat] (Teks A) Halo Dina, liburan kali ini aku pergi ke Pantai Kuta di Bali. Pemandangannya sangat indah, pasirnya putih, dan ombaknya bagus untuk berselancar. Aku banyak mengambil foto matahari terbenam di sana. Rasanya aku tidak ingin pulang.
-(Teks B) Hai Budi, liburan sekolah kemarin ayah mengajakku mendaki Gunung Bromo. Udaranya sangat dingin tetapi pemandangannya menakjubkan. Kami melihat kawah gunung yang mengeluarkan asap. Sungguh pengalaman liburan yang tak terlupakan.
-(Teks C - Percakapan) Ibu: "Dina, pamanmu baru saja menelepon. Katanya dia akan datang besok dari Surabaya." Dina: "Wah, asyik! Apakah Paman akan membawa buah tangan untukku, Bu?" Ibu: "Hush, kamu ini. Jangan mengharap hadiah. Yang penting Paman datang dengan selamat untuk bersilaturahmi."
-[Tipe: PG] Kesimpulan persamaan tema dari Teks A dan Teks B adalah... | Kegiatan belajar di sekolah, Pengalaman berlibur ke tempat wisata, Bencana alam di Indonesia, Hobi fotografi | B | Kedua teks menceritakan pengalaman liburan (Pantai dan Gunung).
-[Tipe: PG] Berdasarkan Teks C (Percakapan), apa topik pembicaraan antara Ibu dan Dina? | Rencana liburan ke Surabaya, Rencana kedatangan Paman, Meminta uang jajan, Mengerjakan PR sekolah | B | Dialog membahas paman yang menelepon dan akan datang.
-[Tipe: PG] Pada percakapan Teks C, Dina menggunakan ungkapan "buah tangan". Makna ungkapan tersebut adalah... | Buah-buahan segar, Hasil karya seni, Oleh-oleh, Pekerjaan tangan | C | Buah tangan adalah idiom yang berarti oleh-oleh.
-###
-###
-[WACANA: Ekspedisi Ilmiah Hutan Hujan] Sekelompok peneliti muda sedang melakukan ekspedisi di hutan Kalimantan. Mereka membawa peta sederhana untuk memandu perjalanan. Perjalanan dimulai dari (1) Pos Penjagaan di kaki bukit, kemudian berjalan ke arah Utara menuju (2) Sungai Jernih. Dari sungai, mereka berbelok ke Timur mendaki bukit menuju (3) Gua Kelelawar.
-Di tepi Sungai Jernih, peneliti mengamati daur hidup katak. Mereka menemukan banyak berudu berenang di air. Fase ini akan segera berubah seiring tumbuhnya kaki. Setelah lelah berjalan, mereka memasak air untuk membuat kopi. Air di dalam panci dipanaskan hingga mendidih dan lama-kelamaan airnya berkurang. Salah satu peneliti mencatat fenomena fisika tersebut di buku jurnalnya.
-[Tipe: PG] [IMG: Peta Sederhana: Pos Penjagaan (Bawah) -> Utara -> Sungai (Tengah) -> Timur -> Gua (Kanan Atas)] Berdasarkan wacana dan arah mata angin, perpindahan latar tempat terakhir peneliti adalah... | Dari Pos Penjagaan ke Sungai, Dari Sungai ke Pos Penjagaan, Dari Sungai ke Gua Kelelawar, Dari Gua ke Sungai | C | Teks menyebutkan: "Dari sungai, berbelok ke Timur... menuju Gua Kelelawar".
-[Tipe: PG] [IMG: Siklus Hidup Katak: Telur -> Berudu -> (X) -> Katak Dewasa] Peneliti mengamati fase berudu. Berdasarkan siklus hidup hewan, fase apakah yang akan terjadi selanjutnya (X)? | Telur, Katak berekor (Katak muda), Pupa, Jentik-jentik | B | Setelah berudu, tumbuh kaki menjadi katak berekor/muda sebelum jadi dewasa.
-[Tipe: BS] Berdasarkan kegiatan memasak air dalam teks, tentukan kebenaran simpulan berikut: | Perubahan wujud yang terjadi adalah menguap (Cair ke Gas) (Benar), Air berkurang karena menyusut menjadi es (Salah) | - | Air mendidih dan berkurang adalah proses penguapan.
-###
-###
-[WACANA: Kancil dan Puisi Alam] Di sebuah hutan, Kancil sedang terjebak di tepi jurang. Di depannya ada Harimau yang lapar siap menerkam. Kancil yang cerdik tidak kehilangan akal. Ia melihat sarang lebah yang besar tergantung di dahan pohon rendah dekat jurang. "Tunggu Harimau!" teriak Kancil. "Kau boleh memakanku, tapi izinkan aku menjaga 'Gong Raja Sulaeman' ini sebentar. Jika dipukul, suaranya sangat merdu." Harimau yang penasaran pun mendekat dan ingin memukul sarang lebah itu. Kancil tersenyum licik, "Baiklah, tapi aku harus lari dulu agar tidak tuli mendengar suaranya."
-Kancil pun berlari menjauh. Harimau memukul sarang lebah itu dengan keras. Bugg! Seketika ribuan lebah marah keluar dan menyerang Harimau. Harimau lari tunggang langgang kesakitan. Pepatah mengatakan, Senjata makan tuan.
-Sambil berlari, Kancil menatap langit pagi dan bersyair: "Oh mentari, Engkau tersenyum menyapa bumi, Membawa hangat, mengusir sepi."
-[Tipe: PG] Berdasarkan konflik yang terjadi, prediksi kejadian selanjutnya setelah Kancil berlari menjauh adalah... | Harimau akan memakan madu dengan lahap, Harimau akan disengat lebah dan Kancil selamat, Kancil akan kembali menolong Harimau, Harimau dan lebah bersahabat | B | Logika cerita: Memukul sarang lebah akan menyebabkan disengat.
-[Tipe: PG] Dalam cerita di atas terdapat peribahasa "Senjata makan tuan". Apa arti peribahasa tersebut dalam konteks nasib Harimau? | Senjata yang sangat tajam, Perbuatan merugikan orang lain yang akhirnya merugikan diri sendiri, Menggunakan senjata untuk berburu, Tuan yang baik hati memberi senjata | B | Harimau ingin makan enak (merugikan Kancil) tapi malah celaka sendiri.
-[Tipe: PG] Pada penggalan puisi, kata "mentari" memiliki makna konotatif/lambang dari... | Bulan, Awan, Matahari, Bintang | C | Mentari adalah kata puitis untuk Matahari.
-###
-###
-[WACANA: Kejujuran di Kantin Sekolah] Bel istirahat berbunyi nyaring. Udin berlari ke kantin dengan perut keroncongan. Di sana, ia melihat Budi sedang makan gorengan. "Bud, kamu makan berapa gorengan?" tanya Ibu Kantin. Budi menyeka mulutnya yang berminyak dan menjawab dengan polos, "Makan lima, Bu. Tapi yang dua tadi rasanya kurang enak, jadi saya hitung tiga saja ya?" Ibu Kantin dan teman-teman lain tertawa mendengar alasan konyol Budi yang mencoba menawar harga gorengan yang sudah masuk perut.
-Setelah kejadian itu, Pak Guru memberikan nasihat di kelas melalui sebuah pantun: Jalan-jalan ke Kota Blitar Jangan lupa membeli sukun Kalau ingin jadi anak pintar Belajarlah jujur dan tekun
-Kejujuran adalah kunci kepercayaan. Di sekolah, perilaku jujur bisa ditunjukkan dengan tidak menyontek saat ulangan dan mengakui kesalahan jika melanggar aturan.
-[Tipe: PG] Berdasarkan teks humor di paragraf pertama, bagian mana yang mengandung makna tersirat paling lucu? | Saat Udin berlari kelaparan, Saat Budi menyeka mulutnya, Saat Budi menawar gorengan yang sudah dimakan karena alasan rasa, Saat Ibu Kantin bertanya jumlah gorengan | C | Kelucuan (anekdot) terletak pada logika Budi yang tidak mau membayar makanan yang sudah dimakan.
-[Tipe: PG] Perhatikan pantun nasihat di atas. Makna isi pantun yang terdapat pada baris 3 dan 4 adalah... | Kita harus sering jalan-jalan ke Blitar, Membeli sukun adalah kewajiban siswa, Syarat menjadi pintar adalah harus jujur dan tekun, Orang pintar biasanya suka makan sukun | C | Makna pantun terdapat pada baris isi (3 dan 4).
-[Tipe: PGK] Disajikan cerita tentang nilai kejujuran. Manakah contoh perilaku di sekolah yang SESUAI dengan nilai tersebut dalam kehidupan nyata? | Mengembalikan pensil teman yang tertinggal, Mengatakan "tidak tahu" saat guru bertanya siapa yang memecahkan kaca padahal ia melihatnya, Melaporkan uang kembalian yang berlebih kepada Ibu Kantin, Mengerjakan PR di sekolah dengan menyalin punya teman | A, C | Perilaku jujur: mengembalikan barang dan jujur soal uang.
-###
-###
-[WACANA: Gerakan Hemat Energi dan Lingkungan] Keluarga Pak RT mengajak warga untuk menerapkan pola hidup hemat energi dan peduli lingkungan. Tips Hemat Energi di Rumah:
-Matikan lampu saat ruangan tidak digunakan.
-Cabut kabel charger jika baterai sudah penuh.
-Gunakan air secukupnya saat mencuci piring.
-Selain itu, setiap hari Minggu diadakan kerja bakti membersihkan selokan. Gotong royong ini penting untuk mencegah banjir dan mempererat tali persaudaraan antarwarga. Pak RT juga menyarankan agar warga menanam pohon peneduh di halaman agar udara lebih segar. Jika tips dan kegiatan ini dilakukan secara rutin, tagihan listrik akan turun dan lingkungan menjadi lebih asri.
-[Tipe: PGK] [IMG: Gambar 4 Kegiatan: A. Anak tidur dengan TV menyala, B. Ibu mematikan kran air, C. Ayah mencabut kabel, D. Lampu menyala di siang hari] Berdasarkan teks, manakah tindakan pada gambar yang BERTENTANGAN dengan prinsip hemat energi? | Gambar A, Gambar B, Gambar C, Gambar D | A, D | Tidur dengan TV menyala dan lampu siang hari adalah pemborosan.
-[Tipe: PG] Mengapa kegiatan gotong royong seperti dalam teks penting diterapkan di lingkungan rumah Anda? | Agar mendapat pujian dari Pak RT, Untuk menjaga kebersihan lingkungan dan kerukunan tetangga, Agar bisa meminjam peralatan tetangga, Supaya harga tanah menjadi mahal | B | Alasan logis sesuai teks: mencegah banjir dan mempererat persaudaraan.
-[Tipe: BS] Berdasarkan tips kesehatan dan lingkungan dalam teks, tentukan kebenaran prediksi berikut: | Jika rutin menanam pohon, udara akan menjadi lebih panas (Salah), Jika rutin mematikan alat listrik tak terpakai, pengeluaran biaya listrik akan berkurang (Benar) | - | Pohon membuat sejuk, hemat listrik mengurangi biaya.
-###
-###
-[WACANA: Layang-Layang Putus] Sore itu angin bertiup kencang. Andi dan Rudi sedang asyik bermain layang-layang di lapangan. Tiba-tiba, benang layangan Andi putus. Layang-layang kesayangannya terbang terbawa angin dan tersangkut di kabel listrik tegangan tinggi yang sangat tinggi. Andi menangis sedih karena tidak bisa mengambilnya. Rudi melarang Andi memanjat tiang listrik karena sangat berbahaya. "Sudahlah Andi, nyawamu lebih berharga daripada layang-layang itu," bujuk Rudi.
-[IMG: Ilustrasi seorang anak sedang memanjat tiang listrik sambil membawa galah bambu] Penulis cerita ingin menyisipkan gambar ilustrasi untuk melengkapi kisah di atas.
-Akhirnya, Andi merelakan layang-layangnya. Ia sadar bahwa bermain di dekat jaringan listrik memang berisiko.
-[Tipe: PG] Masalah dalam cerita adalah layang-layang yang tersangkut di kabel listrik. Solusi alternatif apa yang paling masuk akal dan aman dilakukan di dunia nyata? | Memanjat tiang listrik menggunakan tangga, Melempari kabel dengan batu sampai layangan jatuh, Membiarkan layangan tersebut dan membeli atau membuat yang baru, Meminta tolong petugas PLN saat itu juga | C | Solusi paling aman bagi anak kecil adalah merelakannya.
-[Tipe: BS] [IMG: Ilustrasi anak memanjat tiang listrik] Perhatikan deskripsi ilustrasi di atas. Tentukan kesesuaian ilustrasi tersebut dengan isi cerita dan pesan moralnya: | Ilustrasi tersebut sangat sesuai untuk ditiru (Salah), Ilustrasi tersebut tidak sesuai dengan nasihat Rudi dalam cerita (Benar) | - | Rudi melarang memanjat, jadi gambar anak memanjat bertentangan dengan pesan keselamatan.
-[Tipe: PG] Berdasarkan isi cerita di atas, judul yang paling tepat adalah... | Petualangan di Hutan, Bahaya Bermain di Dekat Kabel Listrik, Cara Membuat Layang-Layang, Persahabatan di Sekolah | B | Judul mencerminkan inti konflik dan pesan cerita.
-###
-###
-[WACANA: Fakta dan Data Kesehatan] Teks Berita: Wabah demam berdarah kembali menyerang Desa Sukamaju. Kepala Puskesmas melaporkan bahwa peningkatan kasus terjadi drastis pada bulan Januari dan Februari karena curah hujan tinggi yang menyebabkan banyak genangan air. Warga diminta waspada.
-Teks Iklan Layanan Masyarakat: [IMG: Poster Iklan Obat Nyamuk] Poster menunjukkan gambar nyamuk raksasa yang mati. Slogan: "Semprot Sekali, Nyamuk Mati, Tidur Jadi Mimpi!" Produk: "Anti-Nyamuk ZOS" - Terbukti ampuh membunuh serangga.
-Teks Argumen: Penggunaan obat nyamuk bakar sebaiknya dihindari di ruang tertutup. Alasannya, asap yang dihasilkan mengandung zat kimia yang dapat mengganggu pernapasan, terutama bagi bayi dan penderita asma. Bukti medis menunjukkan kadar polusi udara dalam kamar meningkat tajam saat obat nyamuk bakar dinyalakan.
-[Tipe: PG] [IMG: Grafik Batang Kasus DBD: Jan (50), Feb (60), Mar (10), Apr (5)] Perhatikan grafik data kasus DBD di samping. Apakah data pada grafik mendukung informasi dalam teks berita? | Tidak mendukung, karena grafik menunjukkan penurunan di Januari, Mendukung, karena grafik menunjukkan angka tertinggi di Januari-Februari, Tidak berhubungan sama sekali, Salah, karena Maret lebih tinggi | B | Teks berita menyebutkan peningkatan di Jan-Feb, grafik visual harus sinkron.
-[Tipe: BS] [IMG: Poster Iklan] Berdasarkan teks iklan, tentukan kebenaran penilaian berikut: | Kalimat slogan sesuai dengan fungsi produk pembasmi nyamuk (Benar), Gambar nyamuk mati tidak berhubungan dengan produk (Salah) | - | Slogan menjanjikan nyamuk mati, sesuai produk.
-[Tipe: PG] Pada Teks Argumen, penulis menyatakan obat nyamuk bakar berbahaya di ruang tertutup. Bagaimana kekuatan bukti/alasan yang disajikan? | Tidak logis, karena obat nyamuk harus dibakar, Sangat logis, karena didukung fakta tentang asap dan gangguan pernapasan, Lemah, karena tidak ada bukti angka, Salah, karena bayi suka bau asap | B | Alasan logis (gangguan napas/asma) memperkuat argumen.
-###
-###
-[WACANA: Dua Sisi Bencana] Teks 1 (Puisi): Langit menangis menumpahkan duka Air cokelat menyapa hingga beranda Boneka kesayanganku hanyut tak tersisa Hanya lumpur yang kini bertahta Menyisakan dingin di dalam dada
-Teks 2 (Berita): Banjir bandang menerjang pemukiman warga pada hari Senin sore. Ketinggian air mencapai 1,5 meter. Tim SAR mengevakuasi warga menggunakan perahu karet. Penyebab banjir diduga akibat luapan sungai setelah hujan deras selama 5 jam. Tidak ada korban jiwa dalam peristiwa ini.
-Boni membaca berita itu sambil memeluk ibunya. "Bu, kasihan sekali adik kecil di TV itu, mainannya hilang semua," ucap Boni lirih.
-[Tipe: PG] Perbedaan cara penyajian informasi antara Teks 1 dan Teks 2 adalah... | Teks 1 menggunakan bahasa kiasan/perasaan, Teks 2 menggunakan fakta/data, Teks 1 berisi data korban, Teks 2 berisi curhatan penulis, Teks 1 adalah berita, Teks 2 adalah dongeng, Teks 1 sulit dimengerti, Teks 2 berirama | A | Teks 1 (Puisi/Fiksi) vs Teks 2 (Berita/Non-Fiksi).
-[Tipe: PG] Suasana yang terbangun dalam Teks 1 (Puisi) adalah... | Gembira dan penuh semangat, Tegang dan menakutkan, Sedih dan mengharukan, Marah dan kecewa | C | Kata kunci: menangis, duka, hanyut, dingin.
-[Tipe: PGK] Boni merasa sedih melihat korban banjir. Ungkapan empati yang tepat diucapkan kepada korban bencana adalah... | "Wah, asyik ya bisa main air sepuasnya!", "Saya turut prihatin atas musibah ini, semoga kalian tetap tabah.", "Mengapa kalian tidak pindah rumah saja dari dulu?", "Semoga bantuan segera datang dan keadaan membaik." | B, D | Ungkapan empati harus sopan dan menghibur.
-###
-###
-[WACANA: Persaingan Si Kancil dan Monyet] Di hutan, Monyet terkenal sangat rakus. Ia mencuri semua pisang milik Kancil. Saat Kancil meminta bagiannya, Monyet malah melempar kulit pisang ke wajah Kancil sambil tertawa terbahak-bahak. "Hahaha, siapa suruh badanmu kecil, kau tidak bisa memanjat!" ejek Monyet. Kancil hanya diam menahan amarah.
-Suatu hari, Monyet sakit perut karena terlalu banyak makan pisang mentah. Ia mengerang kesakitan di bawah pohon. Kancil lewat dan melihatnya. [IMG: Gambar Ekspresi Wajah Kancil yang tersenyum sinis sambil melipat tangan] Kancil berkata dalam hati, "Rasakan akibatnya." Namun, melihat Monyet menangis, hati Kancil luluh. Ia pun mengambilkan obat herbal untuk Monyet. Cerita berakhir saat Kancil memberikan obat itu, dan Monyet menatapnya dengan mata berkaca-kaca... (Cerita selesai).
-[Tipe: PG] Manakah kalimat dalam cerita yang dirancang untuk menimbulkan kesan lucu (humor) atau jenaka bagi pembaca? | Monyet mengerang kesakitan, Kancil menahan amarah, Monyet melempar kulit pisang ke wajah Kancil (Slapstick), Kancil mengambilkan obat | C | Aksi melempar kulit pisang (slapstick) sering dianggap unsur jenaka dalam cerita anak.
-[Tipe: BS] Tokoh antagonis (Monyet) mencuri dan mengejek Kancil. Berikan responsmu terhadap tindakan tersebut: | Saya setuju dengan Monyet karena yang kuat yang menang (Salah), Saya tidak setuju karena itu perbuatan curang dan menyakiti teman (Benar) | - | Respons logis terhadap perilaku buruk.
-[Tipe: PG] Cerita berakhir menggantung saat Monyet menatap Kancil dengan mata berkaca-kaca. Apa simpulan perasaan yang dialami Monyet saat itu? | Marah karena diberi obat pahit, Menyesal dan berterima kasih, Bahagia karena bisa mencuri lagi, Kecewa karena Kancil masih hidup | B | Mata berkaca-kaca setelah ditolong musuh menandakan penyesalan/haru.
-[Tipe: PG] [IMG: Gambar Ekspresi Wajah Kancil tersenyum sinis] Apakah gambar ekspresi tersebut sesuai dengan situasi saat Kancil berkata "Rasakan akibatnya"? | Tidak sesuai, harusnya wajah sedih, Sesuai, menggambarkan perasaan puas melihat musuh celaka, Tidak sesuai, harusnya wajah tertawa lebar, Sesuai, menggambarkan rasa takut | B | Senyum sinis sesuai dengan perasaan "syukurin".
-[Tipe: PG] Jika kamu menjadi Kancil (konflik batin), apa yang akan kamu rasakan saat melihat musuhmu sakit parah? | Merasa bimbang antara ingin membalas dendam atau menolong, Merasa sangat senang dan meninggalkannya, Merasa biasa saja tidak peduli, Merasa takut tertular penyakit | A | Refleksi konflik batin manusiawi: kasihan vs dendam.
-`;
-</script>
-
-<div id="login-screen">
-    <div class="login-box fade-in">
-        <h2 style="color:var(--secondary);">LOGIN PESERTA</h2>
-        <p>Silakan masukkan PIN untuk memulai.</p>
-        <input type="password" id="pinInput" class="login-input" placeholder="Masukkan PIN">
-        <button class="btn-gold" onclick="attemptLogin()">MASUK UJIAN</button>
-        <p id="errorMsg" style="color: #ff8a80; margin-top: 10px; font-size: 0.9rem;"></p>
-    </div>
-</div>
-
-<div id="quiz-container" class="hidden">
-    <header>
-        <div style="font-weight: bold; font-size: 1.2rem;">${JUDUL_KUIS}</div>
-        <div class="timer-badge" id="timer">00:00</div>
-    </header>
-    
-    <main>
-        <div class="wacana-panel" id="wacanaPanel">
-            <div class="wacana-badge">WACANA / INFORMASI</div>
-            <div id="wacanaContent"></div>
-        </div>
-        
-        <div class="question-panel" id="questionPanel">
-            <div class="q-meta">
-                <span id="qNumber">Soal 1 / 30</span>
-                <span id="qTypeBadge">Pilihan Ganda</span>
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h2 id="loginTitle">UJIAN CBT</h2>
+            <p>Masukkan PIN untuk memulai ujian.</p>
+            <div class="input-group">
+                <input type="password" id="pinInput" placeholder="Masukkan PIN Akses">
+                <span class="toggle-password" onclick="togglePin()">Lihat</span>
             </div>
-            <div id="qContent" class="q-text"></div>
-            <ul id="optionsList" class="options-list"></ul>
-            
-            <div class="quiz-footer">
-                <button class="btn-nav btn-check" onclick="checkAnswer()">JAWAB & CEK</button>
-                <button class="btn-nav btn-next hidden" id="btnNext" onclick="nextQuestion()">SOAL BERIKUTNYA</button>
-            </div>
+            <button class="btn-start" onclick="startExam()">MULAI UJIAN</button>
+            <p style="color:red; font-size: 14px; display:none;" id="pinError">PIN Salah! Pastikan penulisan sudah benar.</p>
         </div>
-    </main>
-</div>
-
-<div id="modalOverlay" class="modal-overlay hidden">
-    <div class="modal-content fade-in">
-        <div id="modalTitle" class="feedback-title"></div>
-        <div id="modalMessage"></div>
-        <div class="explanation-box">
-            <strong>Pembahasan:</strong><br>
-            <span id="modalExplanation"></span>
-        </div>
-        <button class="btn-nav btn-check" onclick="closeModal()">TUTUP</button>
     </div>
-</div>
 
-<script>
-    // --- VARIABEL GLOBAL ---
-    let allQuestions = []; // Hasil akhir sampling
-    let currentIndex = 0;
-    let score = 0;
-    let timerInterval;
-    let timeLeft = WAKTU_MENIT * 60;
-    
-    // --- 1. PARSING DATA ENGINE ---
-    function parseData(rawData) {
-        const clusters = rawData.split('###').filter(s => s.trim().length > 0);
-        let parsedClusters = [];
+    <div id="appScreen" class="hidden">
+        <header class="app-header">
+            <h1 id="appTitle">CBT SD</h1>
+            <div class="timer" id="timerDisplay">00:00:00</div>
+            <button class="mobile-drawer-btn" onclick="toggleSidebar()">Grid Soal</button>
+        </header>
 
-        clusters.forEach(clusterTxt => {
-            // Ambil Wacana
-            let wacanaMatch = clusterTxt.match(/\[WACANA:.*?\](.*?)(?=\[Tipe:|$)/s);
-            let wacanaFull = "";
+        <div class="exam-layout">
+            <main class="main-content" id="mainContent">
+                <div class="question-card" id="questionCard">
+                    </div>
+                <div class="bottom-nav">
+                    <button class="btn-nav btn-prev" id="btnPrev" onclick="navigate(-1)">&#9664; Soal Sebelumnya</button>
+                    <button class="btn-nav btn-next" id="btnNext" onclick="navigate(1)">Soal Selanjutnya &#9654;</button>
+                    <button class="btn-nav btn-submit hidden" id="btnSubmit" onclick="confirmSubmit()">Selesai Ujian</button>
+                </div>
+            </main>
+
+            <aside class="sidebar" id="sidebar">
+                <div class="grid-header">Navigasi Soal</div>
+                <div class="grid-container" id="cbtGrid">
+                    </div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="resultScreen" class="hidden" style="min-height: 100vh; background: var(--bg-color); padding-bottom: 50px;">
+        <div class="app-header" style="justify-content: center;">
+            <h1>HASIL UJIAN</h1>
+        </div>
+        <div class="result-container">
+            <h2 style="color: var(--primary); margin-bottom: 10px;">NILAI ANDA</h2>
             
-            // Cek Wacana Header
-            let wacanaTitleMatch = clusterTxt.match(/\[WACANA:\s*(.*?)\]/);
-            let wacanaTitle = wacanaTitleMatch ? wacanaTitleMatch[1] : "Informasi Umum";
+            <div class="score-circle" id="finalScore">0</div>
             
-            if(wacanaMatch) {
-                // Bersihkan teks wacana dan format gambar
-                wacanaFull = formatText(wacanaMatch[0]); 
-            } else {
-                // Cek jika ada gambar berdiri sendiri sebagai wacana (e.g. Foto BJ Habibie)
-                let imgMatch = clusterTxt.match(/\[IMG:.*?\]/);
-                if(imgMatch && clusterTxt.indexOf('[Tipe:') > clusterTxt.indexOf(imgMatch[0])) {
-                    wacanaFull = formatText(clusterTxt.split('[Tipe:')[0]);
-                }
-            }
+            <div class="cert-generator" id="certInputArea">
+                <h3 style="margin-top:0; color: var(--primary);">Selamat! Buat Sertifikat Anda</h3>
+                <p style="font-size: 0.9rem; color: #555; margin-bottom: 15px;">Masukkan nama lengkap Anda untuk mencetak bukti penyelesaian CBT ini.</p>
+                <input type="text" id="inputNamaSiswa" placeholder="Ketik Nama Lengkap Anda di sini...">
+                <button class="btn-nav btn-next" onclick="showMiniCert()" style="width: 100%; font-size: 1.1rem; padding: 12px;">Lihat & Unduh Sertifikat Saya</button>
+            </div>
 
-            // Ambil Soal-soal dalam cluster
-            let questions = [];
-            let qRegex = /\[Tipe:\s*(.*?)\](.*?)(?=\[Tipe:|$)/gs;
-            let match;
-            while ((match = qRegex.exec(clusterTxt)) !== null) {
-                let type = match[1].trim(); // PG, PGK, BS
-                let fullContent = match[2].trim();
-                let parts = fullContent.split('|').map(p => p.trim());
+            <div id="miniCertArea" class="cert-box hidden">
+                <h3>🏆 SERTIFIKAT PENGHARGAAN 🏆</h3>
+                <div class="cert-text">
+                    Sertifikat ini diberikan kepada:
+                    <span class="cert-name" id="displayNamaSiswa">NAMA SISWA</span>
+                    atas penyelesaian Kuis Uji Coba TKA dengan sangat baik.
+                </div>
+                <button class="btn-nav btn-submit" onclick="generateSertifikat()" style="width: 100%; margin-top: 15px; font-size: 1rem; border-radius: 50px; background-color: var(--success); cursor: pointer;">
+                    📥 Cetak/Download Sertifikat Resolusi Tinggi
+                </button>
+            </div>
+            
+            <button class="btn-nav btn-next" onclick="showReview()" style="width: 100%; background-color: var(--primary); border-radius: 8px; cursor: pointer;">📖 Lihat Kunci Jawaban & Pembahasan Lengkap</button>
+
+            <div id="reviewContainer" class="review-box hidden"></div>
+
+            <div class="affiliate-section">
+                <div class="sugesti-teks">
+                    "Investasi terbaik adalah fokus pada pengembangan pengetahuan dan kemampuan."
+                </div>
+                <h4 style="margin-top:0; margin-bottom: 15px; color:var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 10px;">📚 Rekomendasi Buku Penunjang Belajar:</h4>
                 
-                if (parts.length >= 3) {
-                    questions.push({
+                <div class="affiliate-item">
+                    <img src="" alt="Buku Rekomendasi 1" id="uiBuku1Img">
+                    <div>
+                        <strong style="font-size: 1rem; color: #333;" id="uiBuku1Judul">Judul Buku 1</strong><br>
+                        <span style="font-size: 0.8rem; color: #666;" id="uiBuku1Deskripsi">Deskripsi Buku 1</span><br>
+                        <a href="#" target="_blank" class="btn-shopee" id="uiBuku1Link">🛒 Beli di Shopee</a>
+                    </div>
+                </div>
+                
+                <div class="affiliate-item">
+                    <img src="" alt="Buku Rekomendasi 2" id="uiBuku2Img">
+                    <div>
+                        <strong style="font-size: 1rem; color: #333;" id="uiBuku2Judul">Judul Buku 2</strong><br>
+                        <span style="font-size: 0.8rem; color: #666;" id="uiBuku2Deskripsi">Deskripsi Buku 2</span><br>
+                        <a href="#" target="_blank" class="btn-shopee" id="uiBuku2Link">🛒 Beli di Shopee</a>
+                    </div>
+                </div>
+
+                <div class="voucher-box">
+                    <div class="voucher-title"><span>🎟️</span> KLAIM VOUCHER SPESIAL!</div>
+                    <div class="voucher-desc">Manfaatkan Voucher Eksklusif dari <b>Belajar Sukses</b> untuk belanja lebih hemat.</div>
+                    <a href="#" target="_blank" class="btn-voucher" id="uiLinkVoucher">Gunakan Voucher Sekarang</a>
+                </div>
+            </div>
+
+            <div class="cross-sell-section">
+                <h3>🚀 Tingkatkan Terus Prestasi Anda!</h3>
+                <p>Jangan berhenti sampai di sini. Temukan koleksi produk digital eksklusif lainnya dari <strong>Belajar Sukses</strong>. Kami menyediakan e-book, bank soal lengkap, hingga modul interaktif yang dirancang khusus untuk kesuksesan Anda.</p>
+                <a href="#" target="_blank" class="btn-cross-sell" id="uiLinkKatalog">🛍️ Jelajahi Katalog Belajar Sukses</a>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="footer hidden" id="appFooter">
+        &copy; 2026 Belajar Sukses - Hak Cipta Dilindungi
+    </footer>
+
+    <script>
+        // ==========================================
+        // KONFIGURASI DATA UTAMA & PRODUK (VERSI PREMIUM)
+        // SILAKAN EDIT DATA DI BAWAH INI
+        // ==========================================
+        const JUDUL_KUIS = "TKA SD - MATEMATIKA";
+        const PIN_AKSES = "MUDAH100%";
+        const WAKTU_MENIT = 75;
+        const TARGET_TOTAL_SOAL = 30;
+
+        // --- KONFIGURASI VOUCHER SHOPEE AFFILIATE ---
+        const LINK_VOUCHER_SHOPEE = "https://shope.ee/link_voucher_anda"; // Ganti dengan link voucher koleksi Anda
+
+        // --- KONFIGURASI KATALOG PRODUK DIGITAL (CROSS-SELL) ---
+        const LINK_KATALOG_PRODUK = "https://link-toko-digital-anda.com"; // Ganti dengan Linktree/Shopee Store Anda
+
+        // --- KONFIGURASI BUKU 1 (SHOPEE AFFILIATE) ---
+        const BUKU_1_JUDUL = "Buku Sukses Ujian SD Vol. 1";
+        const BUKU_1_DESK = "Buku latihan soal lengkap dengan ringkasan materi dan kunci jawaban.";
+        const BUKU_1_IMG = "https://via.placeholder.com/75x100/0F3D81/D4AF37?text=Buku+1"; // Ganti dengan link gambar asli
+        const BUKU_1_LINK = "https://shope.ee/link_affiliate_anda_1";
+
+        // --- KONFIGURASI BUKU 2 (SHOPEE AFFILIATE) ---
+        const BUKU_2_JUDUL = "Bank Soal Terlengkap SD Tembus Nilai 100";
+        const BUKU_2_DESK = "Kumpulan ribuan soal HOTS terbaru sesuai kurikulum berjalan.";
+        const BUKU_2_IMG = "https://via.placeholder.com/75x100/0F3D81/D4AF37?text=Buku+2"; // Ganti dengan link gambar asli
+        const BUKU_2_LINK = "https://shope.ee/link_affiliate_anda_2";
+
+
+        // ==========================================
+        // AUTO-INJECT KONFIGURASI KE DALAM TAMPILAN HTML
+        // ==========================================
+        document.getElementById('uiLinkVoucher').href = LINK_VOUCHER_SHOPEE;
+        document.getElementById('uiLinkKatalog').href = LINK_KATALOG_PRODUK;
+
+        document.getElementById('uiBuku1Judul').innerText = BUKU_1_JUDUL;
+        document.getElementById('uiBuku1Deskripsi').innerText = BUKU_1_DESK;
+        document.getElementById('uiBuku1Img').src = BUKU_1_IMG;
+        document.getElementById('uiBuku1Link').href = BUKU_1_LINK;
+
+        document.getElementById('uiBuku2Judul').innerText = BUKU_2_JUDUL;
+        document.getElementById('uiBuku2Deskripsi').innerText = BUKU_2_DESK;
+        document.getElementById('uiBuku2Img').src = BUKU_2_IMG;
+        document.getElementById('uiBuku2Link').href = BUKU_2_LINK;
+
+
+        // ==========================================
+        // DATA RAW INJECTION (DARI PROMPT)
+        // ==========================================
+        const RAW_SINGLE = `
+[Tipe: PG] Hasil dari 150 + 50 x 3 - 120 adalah .... | 180 ~ 480 ~ 380 ~ 280 | A | Aturan operasi hitung campuran mendahulukan perkalian: 50 x 3 = 150. Kemudian penjumlahan dan pengurangan dari kiri ke kanan: 150 + 150 - 120 = 300 - 120 = 180. (Opsi B salah karena siswa menjumlahkan 150+50 lebih dulu menjadi 200 x 3 - 120 = 480).
+[Tipe: PG] Di antara pecahan <math><mfrac><mn>3</mn><mn>5</mn></mfrac></math> dan <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math>, urutan yang benar dari yang terkecil adalah .... | <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math>, <math><mfrac><mn>3</mn><mn>5</mn></mfrac></math> ~ <math><mfrac><mn>3</mn><mn>5</mn></mfrac></math>, <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> ~ Keduanya bernilai sama ~ Tidak dapat ditentukan | A | Samakan penyebut menjadi 10 untuk mengurutkan. <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> = <math><mfrac><mn>5</mn><mn>10</mn></mfrac></math> dan <math><mfrac><mn>3</mn><mn>5</mn></mfrac></math> = <math><mfrac><mn>6</mn><mn>10</mn></mfrac></math>. Maka yang terkecil adalah <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math>. (Opsi B salah karena siswa mengira angka 3 pada pembilang otomatis membuat nilainya lebih kecil tanpa menyamakan penyebut).
+[Tipe: PGK] Pilihlah kelompok nilai yang setara dengan pecahan <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math>! | 0,75 ~ 75% ~ 0,34 ~ <math><mfrac><mn>6</mn><mn>8</mn></mfrac></math> | A, B, D | Pecahan <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math> jika diubah ke desimal adalah 3 dibagi 4 = 0,75. Dalam persen adalah 0,75 x 100% = 75%. Pecahan senilainya jika pembilang dan penyebut dikali 2 menjadi <math><mfrac><mn>6</mn><mn>8</mn></mfrac></math>. (Opsi C salah, itu adalah pengecoh visual di mana siswa hanya memindahkan angka 3 dan 4 menjadi desimal).
+[Tipe: PG] Andi memiliki sebuah pita. Ia memotong pita tersebut sepanjang <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> meter untuk adiknya, dan memotong lagi <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> meter untuk kakaknya. Model matematika yang tepat untuk menghitung total pita yang dipotong Andi adalah .... | <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> + <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> ~ <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> - <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> ~ <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> x <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> ~ <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> : <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> | A | Kata kunci "total pita yang dipotong" bermakna menggabungkan kedua potongan, sehingga dimodelkan dengan operasi penjumlahan. (Opsi B salah karena merupakan model pengurangan yang biasa dipakai jika mencari sisa atau selisih).
+[Tipe: PG] Ibu guru memiliki 24 buku tulis dan 36 pensil. Barang-barang tersebut akan dibagikan kepada beberapa siswa dengan jumlah sama banyak untuk setiap jenisnya. Jumlah siswa paling banyak yang dapat menerima barang tersebut dapat dihitung dengan mencari FPB dari 24 dan 36. Nilai FPB tersebut adalah .... | 12 ~ 6 ~ 72 ~ 4 | A | Faktorisasi dari 24 = 2^3 x 3, dan 36 = 2^2 x 3^2. FPB diambil dari pangkat terkecil = 2^2 x 3 = 12. (Opsi B salah karena 6 bukan faktor persekutuan terbesar; Opsi C salah karena 72 adalah nilai KPK; Opsi D salah karena 4 bukan faktor terbesar).
+[Tipe: PG] Andi mendapat jadwal menyiram tanaman setiap 4 hari sekali, Budi setiap 6 hari sekali, dan Cipto setiap 8 hari sekali. Jika mereka bertiga menyiram tanaman bersama-sama pada hari Minggu, mereka akan menyiram tanaman bersama-sama lagi setelah ... hari. | 24 ~ 12 ~ 48 ~ 2 | A | Untuk mencari jadwal bersama, dicari KPK dari 4, 6, dan 8. Faktorisasi: 4=2^2, 6=2x3, 8=2^3. KPK = 2^3 x 3 = 24. (Opsi B salah karena 12 bukan kelipatan 8; Opsi C salah karena 48 adalah kelipatan persekutuan tapi bukan yang terkecil; Opsi D salah karena 2 adalah nilai FPB, bukan KPK).
+[Tipe: PG] Ibu membeli 5 karung beras berukuran kecil untuk dibagikan kepada tetangga. Jika setiap karung beratnya <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math> kg, total berat beras yang dibeli Ibu adalah .... | 3 <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math> kg ~ 5 <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math> kg ~ 15 <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> kg ~ <math><mfrac><mn>8</mn><mn>4</mn></mfrac></math> kg | A | Operasi perkalian bilangan asli dengan pecahan: 5 x <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math> = <math><mfrac><mn>15</mn><mn>4</mn></mfrac></math>. Jika diubah ke pecahan campuran menjadi 3 <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math> kg. (Opsi B salah karena siswa biasanya terjebak hanya menempelkan angka 5 di depan pecahan tanpa mengalikannya; Opsi C salah saat mengubah pecahan biasa ke campuran).
+[Tipe: PG] Seorang pedagang memiliki 12 liter minyak goreng. Minyak tersebut akan dikemas ulang ke dalam botol-botol plastik kecil yang masing-masing mampu menampung <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> liter. Banyaknya botol yang dibutuhkan pedagang tersebut agar semua minyak termuat adalah .... | 24 botol ~ 6 botol ~ 12 botol ~ 2 botol | A | Operasi pembagian bilangan cacah dengan pecahan: 12 : <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> = 12 x <math><mfrac><mn>2</mn><mn>1</mn></mfrac></math> = 24 botol. (Opsi B salah karena siswa tidak membalik pecahan saat membagi, sehingga malah mengalikan 12 dengan 1 lalu dibagi 2).
+[Tipe: PG] [IMG: Sebuah bangun lingkaran yang dipotong menjadi 8 juring (potongan) sama besar, di mana 6 potongan di antaranya diberi warna arsiran gelap] Perhatikan gambar lingkaran di samping! Nilai pecahan paling sederhana yang mewakili daerah yang diarsir adalah .... | <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math> ~ <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> ~ <math><mfrac><mn>6</mn><mn>2</mn></mfrac></math> ~ <math><mfrac><mn>2</mn><mn>8</mn></mfrac></math> | A | Terdapat 6 bagian yang diarsir dari total 8 bagian, maka pecahannya <math><mfrac><mn>6</mn><mn>8</mn></mfrac></math>. Disederhanakan dengan membagi pembilang dan penyebut dengan 2 menjadi <math><mfrac><mn>3</mn><mn>4</mn></mfrac></math>. (Opsi B salah karena itu adalah representasi sisa bagian yang tidak diarsir; Opsi C salah karena membandingkan yang diarsir dengan yang tidak diarsir secara langsung).
+[Tipe: PG] Kakak membeli sepasang sepatu sekolah di swalayan seharga Rp150.000,00. Saat berada di kasir, toko tersebut memberikan diskon sebesar 20%. Berapakah potongan harga (nominal diskon) yang didapatkan Kakak? | Rp30.000,00 ~ Rp120.000,00 ~ Rp20.000,00 ~ Rp130.000,00 | A | Potongan harga = persentase diskon x harga awal = 20% x Rp150.000 = <math><mfrac><mn>20</mn><mn>100</mn></mfrac></math> x 150.000 = Rp30.000,00. (Opsi B salah karena Rp120.000,00 adalah harga akhir yang harus dibayar Kakak, bukan nominal potongannya).
+[Tipe: PG] Ibu memiliki persediaan minyak goreng sebanyak 4,5 liter. Sebanyak 1,25 liter digunakan untuk menggoreng ikan hiasan lauk makan siang. Berapa liter sisa minyak goreng Ibu sekarang? | 3,25 liter ~ 3,35 liter ~ 5,75 liter ~ 3,75 liter | A | Pengurangan desimal bersusun ke bawah harus menyejajarkan koma. 4,50 dikurangi 1,25 sama dengan 3,25. (Opsi B salah karena siswa biasanya lupa meminjam dari angka 5 saat mengurangkan 0 dengan 5 di posisi seperseratus; Opsi C salah karena malah dijumlahkan).
+[Tipe: PG] Perbandingan banyak kelereng Andi dan Budi adalah 3 : 5. Jika banyak kelereng Budi adalah 40 butir, berapakah banyak kelereng Andi? | 24 butir ~ 15 butir ~ 8 butir ~ 64 butir | A | Banyak kelereng Andi = <math><mfrac><mn>3</mn><mn>5</mn></mfrac></math> x 40 = 24 butir. (Opsi B salah karena siswa keliru mengalikan silang tanpa rasio; Opsi C salah karena siswa hanya membagi 40 dengan 5 tanpa mengalikan dengan perbandingan Andi; Opsi D salah karena perbandingan dibalik menjadi <math><mfrac><mn>5</mn><mn>3</mn></mfrac></math> x 40).
+[Tipe: PG] Uang jajan Susi diibaratkan sebagai 1 bagian utuh. Susi menggunakan <math><mfrac><mn>1</mn><mn>3</mn></mfrac></math> bagian uangnya untuk membeli minuman dan <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math> bagian untuk membeli makanan ringan. Model matematika yang tepat untuk menghitung sisa bagian uang Susi adalah .... | 1 - (<math><mfrac><mn>1</mn><mn>3</mn></mfrac></math> + <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math>) ~ 1 - <math><mfrac><mn>1</mn><mn>3</mn></mfrac></math> + <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math> ~ 1 : (<math><mfrac><mn>1</mn><mn>3</mn></mfrac></math> + <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math>) ~ (<math><mfrac><mn>1</mn><mn>3</mn></mfrac></math> + <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math>) - 1 | A | Pengeluaran ditambahkan terlebih dahulu menggunakan tanda kurung, kemudian dikurangkan dari nilai utuh (1). (Opsi B salah karena tanpa tanda kurung, pengurangan dan penjumlahan berurutan akan menghasilkan nilai yang berbeda; Opsi D kebalik).
+[Tipe: PG] Hasil dari operasi pembagian 12,6 dibagi 3 adalah .... | 4,2 ~ 4,02 ~ 0,42 ~ 42 | A | 12,6 : 3 = 4,2. (Opsi B salah karena penempatan nol desimal yang keliru; Opsi C salah karena letak koma bergeser ke kiri; Opsi D salah karena mengabaikan koma sepenuhnya).
+[Tipe: PG] Ayah membeli makanan di restoran seharga Rp150.000,00. Restoran tersebut mengenakan Pajak Pertambahan Nilai (PPN) sebesar 10% dari harga makanan. Berapa total uang keseluruhan yang harus dibayarkan Ayah ke kasir? | Rp165.000,00 ~ Rp15.000,00 ~ Rp135.000,00 ~ Rp160.000,00 | A | Besar pajak = 10% x 150.000 = Rp15.000,00. Total bayar = Harga awal + Pajak = 150.000 + 15.000 = Rp165.000,00. (Opsi B salah karena itu hanya nominal pajaknya saja; Opsi C salah karena harga dikurangi pajak seperti menghitung diskon).
+[Tipe: PGK] [IMG: Gambar 3 jenis bangun datar: Persegi panjang, Segi enam beraturan, dan Lingkaran] Perhatikan bangun-bangun datar pada gambar tersebut. Manakah dari pernyataan berikut yang merupakan sifat dari bangun segi banyak beraturan (seperti segi enam pada gambar)? | Memiliki sisi-sisi yang sama panjang ~ Memiliki sudut-sudut yang sama besar ~ Terdiri dari garis lengkung dan tidak bersudut ~ Hanya memiliki sepasang sisi yang sejajar | A, B | Bangun segi banyak beraturan dibatasi oleh garis lurus, memiliki panjang sisi yang semuanya sama, dan besar sudut yang semuanya sama. (Opsi C salah karena itu sifat lingkaran; Opsi D salah karena itu ciri trapesium sama kaki).
+[Tipe: PG] [IMG: Gambar tumpukan kubus satuan yang transparan, membentuk sebuah balok utuh. Tampak panjangnya 4 kubus, lebarnya 2 kubus, dan tingginya 3 kubus] Berapakah volume bangun ruang gabungan yang terbentuk dari tumpukan kubus satuan pada gambar tersebut? | 24 kubus satuan ~ 9 kubus satuan ~ 14 kubus satuan ~ 12 kubus satuan | A | Volume balok = panjang x lebar x tinggi = 4 x 2 x 3 = 24 kubus satuan. (Opsi B salah karena siswa hanya menjumlahkan 4+2+3=9; Opsi C salah karena siswa mengira rumusnya ditambah seperti keliling).
+[Tipe: PG] [IMG: Sketsa jaring-jaring balok berbentuk huruf T bersilang. Terdapat 6 sisi persegi panjang yang diberi nomor 1 sampai 6. Sisi nomor 3 berada di tengah (pusat persilangan), sisi 1 di kirinya, sisi 5 di kanannya, sisi 2 di atasnya, sisi 4 di bawahnya, dan sisi 6 di bawah sisi 4] Jika sisi nomor 3 dirakit menjadi alas (bagian bawah) balok, maka sisi manakah yang akan menjadi tutup (bagian atas) balok tersebut? | Sisi 4 ~ Sisi 1 ~ Sisi 2 ~ Sisi 6 | A | Dalam memvisualisasikan jaring-jaring balok, sisi alas dan tutup akan selalu dibatasi (dilompati) oleh satu sisi tegak. Jika 3 alas, maka sisi yang berhadapan adalah 4. (Opsi D salah karena 6 akan berhadapan dengan 2).
+[Tipe: PG] Untuk mendirikan tenda pramuka, Budi membutuhkan sebatang tongkat bambu dengan panjang 1,8 meter. Jika diukur menggunakan pita meteran kain, berapakah panjang tongkat tersebut dalam satuan sentimeter (cm)? | 180 cm ~ 18 cm ~ 1.800 cm ~ 0,18 cm | A | Konversi meter ke sentimeter dikalikan 100. Maka 1,8 x 100 = 180 cm. (Opsi B salah karena siswa hanya menggeser koma satu kali / dikali 10; Opsi C salah karena dikali 1000 seperti dari km ke m).
+[Tipe: PG] Ibu membeli ayam potong di pasar tradisional dengan berat 2,5 kilogram. Karena timbangan di rumah hanya menggunakan satuan gram, berapa gram berat ayam yang dibeli Ibu tersebut? | 2.500 gram ~ 250 gram ~ 25.000 gram ~ 25 gram | A | Konversi kilogram ke gram dikalikan 1.000. Maka 2,5 x 1.000 = 2.500 gram. (Opsi B salah karena siswa mengira kilo ke gram hanya turun 2 tangga / dikali 100).
+[Tipe: PG] [IMG: Gambar kemasan botol minuman jus buah bertuliskan "Isi Bersih: 1,5 Liter"] Perhatikan label pada kemasan jus buah tersebut. Jika isi minuman tersebut dituangkan ke dalam gelas ukur kecil, berapa mililiter (ml) volume jus buah tersebut? | 1.500 ml ~ 150 ml ~ 15.000 ml ~ 15 ml | A | Konversi satuan volume dari liter ke mililiter dikalikan 1.000. Maka 1,5 x 1.000 = 1.500 ml. (Opsi B salah karena siswa hanya menggeser koma dua kali atau mengalikan dengan 100 ).
+[Tipe: PG] Saat mengukur seberapa cepat laju kendaraan seperti mobil atau sepeda motor di jalan raya, kita memerlukan perbandingan antara jarak tempuh dengan waktu. Satuan waktu yang paling tepat dan umum digunakan pada speedometer kendaraan untuk mendampingi kilometer adalah .... | jam ~ menit ~ detik ~ hari | A | Laju kendaraan bermotor secara standar internasional maupun nasional diukur dengan satuan kilometer per jam (km/jam).
+[Tipe: PG] Ayah mengendarai mobil dari Kota A menuju Kota B yang berjarak 120 km. Jika waktu yang ditempuh Ayah dalam perjalanan tersebut adalah 2 jam tanpa istirahat, berapakah kecepatan rata-rata mobil Ayah? | 60 km/jam ~ 240 km/jam ~ 122 km/jam ~ 118 km/jam | A | Kecepatan = Jarak dibagi Waktu. Maka 120 km dibagi 2 jam = 60 km/jam. (Opsi B salah karena siswa mengira rumusnya dikali seperti mencari jarak; Opsi C dan D salah karena dijumlah atau dikurang ).
+[Tipe: PG] [IMG: Gambar bangun datar segitiga dengan panjang alas 12 cm dan garis putus-putus tegak lurus ke atas yang menunjukkan tinggi 8 cm] Berapakah luas bangun datar segitiga pada gambar tersebut? | 48 cm2 ~ 96 cm2 ~ 20 cm2 ~ 10 cm2 | A | Luas segitiga = <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> x alas x tinggi = <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> x 12 x 8 = 48 cm2. (Opsi B salah karena siswa menggunakan rumus luas persegi panjang yaitu panjang x lebar tanpa membagi dua atau mengalikannya dengan pecahan setengah ).
+[Tipe: PG] [IMG: Gambar trapesium sembarang ABCD dengan ukuran panjang sisi luar: sisi atas 7 cm, sisi bawah 15 cm, sisi miring kiri 8 cm, dan sisi miring kanan 9 cm] Andi diminta menghitung keliling bangun trapesium tersebut. Berapakah hasil perhitungan keliling yang benar? | 39 cm ~ 105 cm ~ 56 cm ~ 72 cm | A | Keliling bangun datar dihitung dengan cara menjumlahkan panjang seluruh sisi luarnya: 7 + 15 + 8 + 9 = 39 cm. (Opsi B salah karena siswa secara otomatis mengalikan 15 x 7 layaknya mencari luas persegi panjang karena lupa konsep keliling ).
+[Tipe: PG] Rina ingin menghias sebuah kotak kado berbentuk balok. Ia berencana menempelkan pita mengelilingi sisi alas kotak tersebut. Jika panjang alas kotak adalah 20 cm dan lebarnya 15 cm, model matematika yang tepat untuk menghitung panjang pita minimal yang dibutuhkan adalah .... | (2 x 20) + (2 x 15) ~ 20 x 15 ~ 20 + 15 ~ (20 x 15) : 2 | A | Untuk mengelilingi alas berbentuk persegi panjang, digunakan rumus keliling: 2 x (panjang + lebar) atau (2 x panjang) + (2 x lebar). (Opsi B salah karena itu adalah rumus mencari luas; Opsi C salah karena itu hanya menjumlahkan dua sisi bukan mengelilingi seluruh keempat sisinya).
+[Tipe: PG] Sebuah bak penampungan air berbentuk kubus memiliki ukuran panjang rusuk bagian dalam 8 dm. Berapa liter volume air yang dapat ditampung bak tersebut hingga penuh? | 512 liter ~ 64 liter ~ 24 liter ~ 5.120 liter | A | Volume kubus = rusuk x rusuk x rusuk = 8 dm x 8 dm x 8 dm = 512 dm3. Karena 1 dm3 = 1 liter, maka volumenya adalah 512 liter. (Opsi B salah karena siswa hanya mengalikan 8 x 8; Opsi C salah karena siswa mengira rumusnya ditambah 8+8+8).
+[Tipe: PG] [IMG: Gambar potongan kertas berpetak berbentuk segitiga siku-siku, di mana salah satu sudutnya tepat membentuk sudut tegak lurus mengikuti garis kotak-kotak petak] Berdasarkan gambar potongan kertas berpetak tersebut, berapakah besar sudut siku-siku yang terbentuk? | 90° ~ 45° ~ 180° ~ 60° | A | Sudut siku-siku selalu memiliki besar sudut tepat 90 derajat. (Opsi B salah karena itu biasanya besar sudut lancip pada segitiga siku-siku sama kaki; Opsi C salah karena itu besar sudut lurus).
+[Tipe: PG] Andi mengukur panjang meja belajarnya menggunakan meteran pita. Hasil pengukurannya menunjukkan angka tepat di 124,7 cm. Jika guru meminta panjang meja tersebut ditaksir (dibulatkan) ke satuan sentimeter terdekat, berapakah taksiran panjang mejanya? | 125 cm ~ 124 cm ~ 130 cm ~ 120 cm | A | Aturan pembulatan: jika angka desimal persepuluhannya (angka setelah koma) adalah 5 atau lebih, dibulatkan ke atas. Karena angka belakangnya 7, maka dibulatkan menjadi 125 cm. (Opsi B salah karena siswa membulatkan ke bawah mengabaikan angka 7; Opsi C salah karena pembulatan ke puluhan terdekat).
+[Tipe: PG] Ibu membuat kue di dapur selama durasi 1,5 jam. Berapa menit lama waktu Ibu membuat kue tersebut? | 90 menit ~ 150 menit ~ 60 menit ~ 105 menit | A | 1 jam = 60 menit. Maka 1,5 jam = 1,5 x 60 = 90 menit. Atau bisa dipisah 1 jam (60 menit) ditambah setengah jam (30 menit) = 90 menit. (Opsi B salah karena siswa hanya membuang tanda koma dari 1,5; Opsi D salah jika siswa keliru menghitung setengah jam sebagai 45 menit).
+[Tipe: PG] [IMG: Tabel frekuensi hobi siswa Kelas 6. Membaca: 8 siswa, Berenang: 12 siswa, Sepak Bola: 15 siswa, Menari: 5 siswa] Berdasarkan tabel data tersebut, hobi apakah yang paling banyak diminati oleh siswa? | Sepak Bola ~ Berenang ~ Membaca ~ Menari | A | Data tertinggi pada tabel adalah 15 siswa, yang merupakan frekuensi untuk hobi Sepak Bola. (Opsi B, C, dan D salah karena frekuensinya lebih rendah).
+[Tipe: PGK] [IMG: Piktogram hasil panen buah desa. Apel: 4 gambar keranjang. Jeruk: 3 gambar keranjang. Mangga: 5 gambar keranjang. Pisang: 4 gambar keranjang. Legenda di bawah tabel: 1 gambar keranjang = 10 kg] Buah apa saja yang hasil panennya tepat berjumlah 40 kg? | Apel ~ Pisang ~ Jeruk ~ Mangga | A, B | Kuantitas 40 kg berarti membutuhkan 4 gambar keranjang (40 dibagi 10). Pada piktogram, buah yang memiliki 4 gambar keranjang penuh adalah Apel dan Pisang. (Opsi C salah karena jeruk 30 kg; Opsi D salah karena mangga 50 kg).
+[Tipe: PG] [IMG: Diagram batang tinggi badan siswa. Ali: 140 cm, Budi: 135 cm, Caca: 145 cm, Doni: 130 cm] Berapakah selisih tinggi badan antara siswa yang paling tinggi dan siswa yang paling pendek di kelompok tersebut? | 15 cm ~ 10 cm ~ 5 cm ~ 20 cm | A | Siswa tertinggi adalah Caca (145 cm). Siswa terpendek adalah Doni (130 cm). Selisihnya adalah 145 dikurangi 130 = 15 cm. (Opsi B salah karena siswa terjebak menghitung selisih Ali dan Caca atau Ali dan Doni).
+[Tipe: PG] [IMG: Tabel catatan absensi sakit siswa kelas 6 dalam sebulan. Minggu 1: 2 siswa, Minggu 2: 0 siswa, Minggu 3: 3 siswa, Minggu 4: 1 siswa] Jika data pada tabel tersebut dimodelkan menjadi sebuah diagram batang vertikal, berapakah jumlah total dari tinggi seluruh batang jika digabungkan (dengan catatan 1 siswa diwakili batang setinggi 1 satuan)? | 6 satuan ~ 5 satuan ~ 4 satuan ~ 7 satuan | A | Total batang merupakan akumulasi dari total absensi sakit yaitu 2 + 0 + 3 + 1 = 6 siswa. Sehingga jika tinggi seluruh batang digabungkan menjadi 6 satuan. (Opsi B salah jika siswa melewatkan data pada minggu ke-4; Opsi C salah jika salah menjumlahkan).
+[Tipe: PG] [IMG: Diagram piktogram jumlah buku di perpustakaan. Kategori Buku Cerita memiliki 6 gambar buku penuh dan 1 gambar setengah buku. Terdapat keterangan bahwa total Buku Cerita sebenarnya adalah 130 buku] Berdasarkan informasi pada piktogram tersebut, 1 gambar buku penuh mewakili berapa buku sebenarnya? | 20 buku ~ 10 buku ~ 13 buku ~ 65 buku | A | Gambar yang ada berjumlah 6 gambar penuh ditambah 1 setengah gambar (6,5 gambar). Jika 6,5 gambar setara dengan 130 buku, maka 1 gambar penuh = 130 dibagi 6,5 = 20 buku. (Opsi C salah karena siswa langsung membagi 130 dengan 10; Opsi D salah karena membagi 130 dengan 2).
+[Tipe: BS] [IMG: Tabel A berisi data Berat Badan Kelas 6A (30 kg = 5 anak, 32 kg = 7 anak, 35 kg = 3 anak) dan Tabel B berisi data Berat Badan Kelas 6B (30 kg = 6 anak, 32 kg = 6 anak, 35 kg = 3 anak)] Tentukan Benar atau Salah pernyataan berikut mengenai persamaan antara kedua tabel data tersebut! | Kedua kelas sama-sama memiliki 3 anak yang berat badannya 35 kg (Benar) ~ Jumlah total seluruh siswa di Kelas 6A sama dengan jumlah total seluruh siswa di Kelas 6B (Benar) ~ Jumlah siswa paling banyak di kedua kelas berada pada kelompok berat badan yang sama (Salah) | - | Persamaan pertama benar karena sama-sama berjumlah 3 anak. Total murid 6A = 5+7+3 = 15 anak. Total murid 6B = 6+6+3 = 15 anak (Benar, jumlahnya sama). Siswa terbanyak di 6A berada di berat 32 kg, sedangkan di 6B terbanyak ada dua (kembar di 30 kg dan 32 kg), sehingga pernyataannya Salah.
+[Tipe: PG] [IMG: Diagram batang ganda pengunjung perpustakaan dari hari Senin hingga Rabu. Batang Biru (Kelas 5): Senin=10, Selasa=15, Rabu=25. Batang Merah (Kelas 6): Senin=20, Selasa=15, Rabu=10] Berdasarkan diagram tersebut, kesimpulan yang tepat mengenai tren pengunjung adalah .... | Tren pengunjung Kelas 5 selalu mengalami kenaikan setiap harinya ~ Tren pengunjung Kelas 6 selalu mengalami kenaikan setiap harinya ~ Tren pengunjung kedua kelas mengalami penurunan pada hari Rabu ~ Jumlah pengunjung Kelas 5 dan Kelas 6 selalu sama setiap harinya | A | Pengunjung Kelas 5 naik dari 10 menjadi 15, lalu ke 25 (selalu naik). (Opsi B salah karena tren Kelas 6 justru menurun dari 20 ke 15 ke 10; Opsi C dan D secara visual langsung gugur karena bertentangan dengan diagram).
+[Tipe: PG] Di sudut baca ruang kelas, terdapat daftar koleksi buku: 24 buku dongeng, 15 buku ensiklopedia mini, dan 18 buku biografi pahlawan. Prosedur hitung yang tepat untuk mencari total keseluruhan buku cerita di sudut baca tersebut adalah .... | 24 + 15 + 18 ~ 24 x 15 x 18 ~ (24 + 15) x 18 ~ 24 + (18 - 15) | A | Untuk mencari total keseluruhan objek dari berbagai kategori dalam sebuah daftar, prosedur aplikasinya adalah penjumlahan beruntun. (Opsi B salah karena perkalian digunakan untuk melipatgandakan objek, bukan menggabungkan daftar kuantitas).
+[Tipe: PG] [IMG: Tabel hasil ujian matematika Kelas 6. Nilai 60: 4 anak, Nilai 70: 6 anak, Nilai 80: 8 anak, Nilai 90: 5 anak, Nilai 100: 2 anak. Keterangan di bawah tabel: Batas KKM kelulusan adalah nilai 75] Berdasarkan tabel hasil ujian tersebut, berapakah jumlah murid yang berhasil lulus? | 15 anak ~ 10 anak ~ 25 anak ~ 8 anak | A | Lulus berarti nilainya di atas batas KKM (75). Nilai yang memenuhi adalah 80 (8 anak) + 90 (5 anak) + 100 (2 anak) = 15 anak. (Opsi B salah karena itu adalah jumlah siswa yang "gagal" atau remidial: 4+6=10 anak; Opsi C salah karena siswa menjumlahkan seluruh anak di kelas tanpa peduli KKM).
+[Tipe: PG] [IMG: Grafik garis sederhana jumlah hari masuk sekolah Doni selama 4 bulan. Juli: 15 hari, Agustus: 24 hari, September: 22 hari, Oktober: 25 hari] Berdasarkan grafik tersebut, berapakah jumlah total hari masuk sekolah Doni pada bulan Agustus dan September jika digabungkan? | 46 hari ~ 86 hari ~ 24 hari ~ 47 hari | A | Hari masuk pada bulan Agustus = 24 hari. Bulan September = 22 hari. Total penggabungannya = 24 + 22 = 46 hari. (Opsi B salah jika siswa secara ceroboh menjumlahkan seluruh bulan di grafik: 15+24+22+25=86).
+`;
+
+        const RAW_CLUSTER = `
+###
+[WACANA: Tugas Presentasi Kelompok] Kelompok belajar kelas 6 sedang menyusun tugas presentasi video. Mereka mendapati bahwa sisa kapasitas memori di sebuah HP tinggal sedikit untuk menyimpan hasil rekaman. Resolusi layar HP yang digunakan untuk merekam disetel pada rasio standar, dan mereka harus membagi waktu dengan efisien agar video selesai diedit sebelum tenggat waktu.
+[Tipe: PG] [IMG: Infografis layar HP yang menunjukkan diagram lingkaran sisa memori dengan tulisan "Sisa Penyimpanan: 2 GB"] Berdasarkan infografis tersebut, jika dikonversi ke satuan Megabyte (MB), berapa kapasitas ruang penyimpanan yang tersisa? (Catatan: 1 GB = 1.024 MB) | 2.048 MB ~ 2.000 MB ~ 1.024 MB ~ 248 MB | A | Konversi memori adalah 1 GB = 1.024 MB. Maka 2 GB = 2 x 1.024 = 2.048 MB. (Opsi B salah karena siswa menggunakan perkalian pembulatan 1000 yang biasa dipakai pada berat/panjang).
+[Tipe: PG] Resolusi layar HP yang mereka gunakan memiliki rasio aspek 16:9 (Panjang : Lebar). Jika diketahui ukuran lebar layar HP tersebut adalah 9 cm, berapakah panjang layarnya? | 16 cm ~ 25 cm ~ 144 cm ~ 7 cm | A | Perbandingan Panjang : Lebar adalah 16 : 9. Jika Lebar = 9 cm, maka Panjang = (16 dibagi 9) dikali 9 cm = 16 cm. (Opsi B salah karena siswa malah menjumlahkan 16+9).
+[Tipe: BS] Kelompok tersebut memiliki target waktu 2 jam untuk menyelesaikan pengeditan video. Jika mereka telah menghabiskan waktu selama 1 jam 20 menit, tentukan Benar atau Salah pernyataan berikut terkait sisa waktu mereka! | Sisa waktu yang mereka miliki adalah 40 menit (Benar) ~ Sisa waktu yang mereka miliki adalah 80 menit (Salah) | - | 2 jam setara dengan 120 menit. Waktu terpakai adalah 1 jam 20 menit = 60 + 20 = 80 menit. Sisa waktu yang dibutuhkan = 120 - 80 = 40 menit.
+###
+###
+[WACANA: Bazar Makanan Tradisional Kelas] Kelas 6 mengadakan bazar makanan tradisional untuk mengumpulkan uang kas. Mereka membuat perencanaan modal, harga jual, serta mencatat porsi makanan yang laku terjual setiap harinya. Target uang kas yang ingin mereka kumpulkan dari keuntungan bazar ini adalah Rp300.000,00.
+[Tipe: PG] Siswa membeli bahan baku kue lemper dengan modal Rp2.000,00 per potong. Jika kelas menetapkan target persentase keuntungan sebesar 50% dari modal, model matematika untuk menghitung laba atau keuntungan dari satu potong lemper adalah .... | 2.000 x <math><mfrac><mn>50</mn><mn>100</mn></mfrac></math> ~ 2.000 + (2.000 x <math><mfrac><mn>50</mn><mn>100</mn></mfrac></math>) ~ 2.000 - (2.000 x <math><mfrac><mn>50</mn><mn>100</mn></mfrac></math>) ~ 2.000 : <math><mfrac><mn>50</mn><mn>100</mn></mfrac></math> | A | Untuk menghitung nominal laba saja, modalkan dikalikan dengan persentase keuntungan. Jadi modelnya adalah 2.000 x <math><mfrac><mn>50</mn><mn>100</mn></mfrac></math>. (Opsi B salah karena itu adalah model untuk mencari "Harga Jual" total, bukan persentase labanya saja).
+[Tipe: PGK] [IMG: Diagram batang porsi terjual: Klepon (30 porsi), Onde-onde (20 porsi), Getuk (45 porsi), Kue Lumpur (15 porsi)] Berdasarkan diagram penjualan tersebut, pernyataan mana saja yang menginterpretasikan makanan yang paling laris dengan benar? | Getuk adalah makanan yang paling laris di bazar ~ Selisih porsi terjual antara Getuk dan Kue Lumpur adalah 30 porsi ~ Total porsi Klepon dan Onde-onde yang terjual adalah 50 porsi ~ Kue Lumpur lebih laris daripada Onde-onde | A, B, C | Pernyataan A benar karena batang Getuk tertinggi (45 porsi). Pernyataan B benar karena 45 - 15 = 30. Pernyataan C benar karena 30 + 20 = 50. (Opsi D salah karena Kue Lumpur yang hanya 15 porsi lebih sedikit dari Onde-onde yang 20 porsi).
+[Tipe: BS] [IMG: Tabel pendapatan laba bersih bertahap: Hari ke-1 (Rp120.000,00), Hari ke-2 (Rp95.000,00), Hari ke-3 (Rp80.000,00)] Evaluasilah kebenaran pernyataan berikut berdasarkan tabel pendapatan dan target uang kas kelas sebesar Rp300.000,00! | Total pendapatan laba bersih selama 3 hari belum mencapai target uang kas yang diharapkan (Benar) ~ Uang kas yang terkumpul sudah melebihi target sebesar Rp5.000,00 (Salah) | - | Total laba dari tabel adalah 120.000 + 95.000 + 80.000 = Rp295.000,00. Target mereka Rp300.000,00. Maka uang tersebut belum mencapai target uang kas (kurang Rp5.000,00).
+###
+###
+[WACANA: Menabung untuk Beli Sepatu] Doni sangat ingin membeli sepatu olahraga baru incarannya yang seharga Rp240.000,00. Ia berencana menyisihkan sebagian uang jajannya setiap minggu selama satu bulan penuh (4 minggu) ke depan. Rencananya, ia akan menabung dengan jumlah yang sama setiap minggunya agar uang tersebut pas terkumpul. Namun, pada minggu ketiga, ia harus membongkar celengannya dan memakai sebagian uang tabungannya untuk membeli buku tulis dan alat lukis sekolah yang mendadak habis.
+[Tipe: PG] Jika Doni ingin mengumpulkan Rp240.000,00 dalam 4 minggu secara merata, berapakah uang minimal yang harus ia sisihkan setiap minggunya (sebelum ada kejadian mendadak)? | Rp60.000,00 ~ Rp80.000,00 ~ Rp40.000,00 ~ Rp120.000,00 | A | Rp240.000 dibagi 4 minggu = Rp60.000 per minggu. (Opsi B salah karena siswa keliru membagi target dengan 3 minggu; Opsi C salah karena membaginya dengan angka acak).
+[Tipe: BS] [IMG: Tabel tabungan rill Doni: Minggu ke-1 (Rp60.000), Minggu ke-2 (Rp60.000), Minggu ke-3 (Rp25.000), Minggu ke-4 (Rp60.000)] Jika data pada tabel riwayat menabung Doni tersebut diubah menjadi diagram batang, tentukan Benar atau Salah pernyataan berikut! | Batang grafik pada Minggu ke-3 akan menjadi yang paling pendek dibandingkan minggu lainnya (Benar) ~ Selisih tinggi batang antara Minggu ke-2 dan Minggu ke-3 mewakili nominal Rp35.000,00 (Benar) ~ Tinggi batang grafik pada Minggu ke-1 dan Minggu ke-4 akan terlihat berbeda (Salah) | - | Minggu ke-3 jumlahnya paling kecil (Rp25.000), sehingga batangnya paling pendek. Selisih dengan minggu ke-2 (Rp60.000) adalah 60.000 - 25.000 = Rp35.000. Batang minggu ke-1 dan ke-4 sama tingginya karena nominalnya sama persis.
+[Tipe: PGK] Berdasarkan riwayat tabungannya, pada minggu ketiga Doni terpaksa memakai jatah tabungannya sebesar Rp35.000,00 untuk keperluan alat lukis. Pernyataan manakah yang merupakan kesimpulan tepat mengenai kondisi uang Doni di akhir minggu keempat? | Total uang yang terkumpul di celengan Doni hanya Rp205.000,00 ~ Doni mengalami kekurangan uang sebesar Rp35.000,00 untuk membeli sepatu incarannya ~ Uang tabungan Doni sudah cukup untuk membeli sepatu ~ Doni masih butuh menabung setengah bulan lagi agar target tercapai | A, B | Total uang yang berhasil dikumpulkan = 60.000 + 60.000 + 25.000 + 60.000 = 205.000. Target 240.000. Kekurangan = 240.000 - 205.000 = 35.000. (Opsi C salah; Opsi D salah karena Rp35.000 kurang dari jatah menabung per minggunya (Rp60.000), jadi tidak perlu sampai setengah bulan lagi).
+###
+###
+[WACANA: Majalah Dinding (Mading) Sekolah] Siswa kelas 6 sedang mengikuti lomba menghias Majalah Dinding (Mading) antarkelas. Papan mading di kelas mereka berbentuk persegi panjang dengan ukuran panjang 2 meter dan lebar 1 meter. Mereka sepakat ingin menutupi seluruh latar belakang papan kayu mading tersebut menggunakan kertas origami berukuran 20 cm x 20 cm sebelum menempelkan karya-karya mading. Nantinya, hasil karya mereka akan dinilai oleh dewan juri.
+[Tipe: PG] Berapa lembar kertas origami yang dibutuhkan oleh kelas 6 untuk menutupi seluruh permukaan latar belakang mading tersebut tanpa ada yang tumpang tindih? | 50 lembar ~ 100 lembar ~ 500 lembar ~ 20 lembar | A | Luas mading = 2 m x 1 m = 200 cm x 100 cm = 20.000 cm persegi. Luas 1 origami = 20 cm x 20 cm = 400 cm persegi. Jumlah = 20.000 : 400 = 50 lembar. (Opsi B salah karena siswa sering keliru mengkonversi 1 m = 10 cm, sehingga luas mading dianggap 20x10=200 lalu bingung membaginya).
+[Tipe: PGK] [IMG: Tabel rubrik penilaian lomba mading: Aspek Kreativitas (Maksimal 40 poin), Kerapian (Maksimal 30 poin), Isi/Konten (Maksimal 30 poin). Nilai akhir Kelas 6: Kreativitas 35, Kerapian 28, Isi 25] Berdasarkan rubrik penilaian dari juri tersebut, pernyataan mana saja yang benar mengenai hasil mading Kelas 6? | Total nilai keseluruhan yang diperoleh Kelas 6 adalah 88 poin ~ Kelas 6 kehilangan 5 poin pada aspek penilaian Isi/Konten ~ Nilai Kerapian Kelas 6 sudah mencapai batas maksimal ~ Total nilai maksimal yang bisa didapat peserta dalam lomba ini adalah 100 poin | A, B, D | Total nilai Kelas 6 = 35 + 28 + 25 = 88 poin. Kehilangan pada aspek Isi = Maksimal 30 - didapat 25 = selisih 5 poin. Total maksimal keseluruhan = 40 + 30 + 30 = 100 poin. (Opsi C salah karena nilai Kerapian 28 belum mencapai nilai maksimal 30).
+[Tipe: PG] Rencananya, area depan papan mading tersebut akan dibagi secara proporsional. Karya puisi akan menempati <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> bagian, dan berita sains akan menempati <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math> bagian. Sisa area yang kosong akan khusus digunakan untuk memajang gambar lukisan. Berapa bagian area mading yang digunakan untuk gambar lukisan? | <math><mfrac><mn>7</mn><mn>20</mn></mfrac></math> bagian ~ <math><mfrac><mn>13</mn><mn>20</mn></mfrac></math> bagian ~ <math><mfrac><mn>3</mn><mn>9</mn></mfrac></math> bagian ~ <math><mfrac><mn>3</mn><mn>20</mn></mfrac></math> bagian | A | Total area mading = 1 utuh. Bagian puisi dan berita dijumlahkan = <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> + <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math> = <math><mfrac><mn>5</mn><mn>20</mn></mfrac></math> + <math><mfrac><mn>8</mn><mn>20</mn></mfrac></math> = <math><mfrac><mn>13</mn><mn>20</mn></mfrac></math>. Sisa untuk lukisan = 1 - <math><mfrac><mn>13</mn><mn>20</mn></mfrac></math> = <math><mfrac><mn>20</mn><mn>20</mn></mfrac></math> - <math><mfrac><mn>13</mn><mn>20</mn></mfrac></math> = <math><mfrac><mn>7</mn><mn>20</mn></mfrac></math>. (Opsi B salah karena pecahan tersebut adalah total area puisi dan berita, bukan sisa untuk lukisan; Opsi C salah karena penyebutnya langsung dijumlahkan 4+5=9).
+###
+###
+[WACANA: Menghias Ruang Kelas] Siswa kelas 6 bergotong royong menghias ruang kelas menjelang lomba kebersihan. Mereka sepakat untuk melapisi bagian belakang dinding kelas dengan kertas marmer berwarna-warni. Untuk mempercantik tepian papan informasi di dinding tersebut, mereka juga akan menempelkan pita hias.
+[Tipe: PG] [IMG: Sketsa dinding kelas berbentuk persegi panjang berukuran panjang 4 meter dan tinggi 3 meter. Di tengah dinding terdapat sebuah papan informasi berbentuk persegi panjang berukuran panjang 2 meter dan tinggi 1 meter.] Berapakah luas area dinding bersih yang akan dilapisi kertas marmer (setelah dikurangi area papan informasi)? | 10 m2 ~ 12 m2 ~ 2 m2 ~ 14 m2 | A | Luas dinding keseluruhan = 4 x 3 = 12 m2. Luas papan informasi = 2 x 1 = 2 m2. Area yang dilapisi = 12 - 2 = 10 m2. (Opsi B salah karena itu luas dinding tanpa dikurangi papan; Opsi C salah karena itu hanya luas papannya saja).
+[Tipe: PG] Untuk menghias dinding tersebut, panitia kelas memperkirakan butuh 40 lembar kertas marmer. Harga satu lembar kertas marmer adalah Rp2.500,00. Jika total biaya tersebut akan ditanggung sama rata oleh 20 siswa di kelas, model kalimat matematika yang tepat untuk menghitung iuran per siswa adalah .... | (40 x 2.500) : 20 ~ 40 x (2.500 : 20) ~ (40 : 20) x (2.500 : 20) ~ 40 + 2.500 : 20 | A | Total biaya dicari dengan mengalikan jumlah lembar dengan harga per lembar (menggunakan tanda kurung), lalu dibagi rata ke 20 siswa. (Opsi D salah karena operasi penjumlahan bukan untuk mencari total harga).
+[Tipe: BS] Untuk tepian papan, mereka membutuhkan pita hias sepanjang 17 meter tanpa boleh ada potongan sambungan kecil. Di toko, pita hanya dijual dalam bentuk gulungan utuh. Tentukan Benar atau Salah pernyataan berikut terkait evaluasi sisa pita! | Jika membeli gulungan pita ukuran 5 meteran sebanyak 4 gulung, maka akan ada sisa pita sepanjang 3 meter (Benar) ~ Jika membeli gulungan pita ukuran 3 meteran sebanyak 6 gulung, maka panjang pita sudah pas 17 meter tanpa sisa (Salah) | - | 4 gulung x 5 m = 20 m. Sisa = 20 - 17 = 3 meter. Untuk pernyataan kedua, 6 gulung x 3 m = 18 m. 18 m masih memiliki sisa 1 meter (bukan pas tanpa sisa).
+###
+###
+[WACANA: Karya Wisata ke Museum] Rombongan siswa kelas 6 mengadakan karya wisata edukasi ke Museum Nasional. Mereka berangkat dari sekolah menggunakan bus pariwisata. Panitia guru telah menyusun rute perjalanan, jadwal keberangkatan, serta logistik konsumsi di dalam bus agar perjalanan lancar dan nyaman.
+[Tipe: PG] [IMG: Peta rute perjalanan dari sekolah menuju museum dengan keterangan "Jarak Tempuh: 60 km" dan "Laju Rata-rata Bus: 40 km/jam"] Model penyelesaian hitungan yang tepat untuk mengetahui waktu tempuh perjalanan bus tersebut dalam satuan jam adalah .... | <math><mfrac><mn>60</mn><mn>40</mn></mfrac></math> ~ <math><mfrac><mn>40</mn><mn>60</mn></mfrac></math> ~ 60 x 40 ~ 60 + 40 | A | Rumus waktu tempuh adalah Jarak dibagi Kecepatan. Maka model pecahannya adalah Jarak (pembilang) dan Kecepatan (penyebut) yaitu <math><mfrac><mn>60</mn><mn>40</mn></mfrac></math>. (Opsi B salah karena terbalik Kecepatan dibagi Jarak; Opsi C salah karena itu rumus mencari jarak).
+[Tipe: PG] Panitia menyediakan air mineral galon untuk peserta. Jika setiap anak mendapatkan jatah <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> liter air mineral di botolnya masing-masing, dan terdapat 40 orang anak di dalam bus, berapa liter total kebutuhan air mineral tersebut? | 10 liter ~ 160 liter ~ 40 <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> liter ~ <math><mfrac><mn>40</mn><mn>40</mn></mfrac></math> liter | A | Operasi perkalian bilangan asli dengan pecahan: 40 x <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> = <math><mfrac><mn>40</mn><mn>4</mn></mfrac></math> = 10 liter. (Opsi B salah karena siswa membagi 40 dengan <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> sehingga 40 x 4 = 160; Opsi C salah karena langsung digabung jadi pecahan campuran tanpa dikalikan).
+[Tipe: PGK] [IMG: Tabel jadwal perjalanan wisata memuat data: Berangkat pukul 07.15 WIB, Durasi Perjalanan Murni 1 Jam 30 Menit, Istirahat di Rest Area 15 Menit] Berdasarkan jadwal tersebut, manakah analisis pernyataan yang BENAR mengenai waktu kedatangan rombongan? | Rombongan akan tiba di museum tepat pukul 09.00 WIB ~ Jika bus memutuskan tidak berhenti di rest area, mereka akan tiba pada pukul 08.45 WIB ~ Rombongan menghabiskan total durasi waktu 1 jam 45 menit dari berangkat hingga tiba ~ Rombongan akan tiba pukul 08.30 WIB jika istirahat dilamakan | A, B, C | Waktu tiba = 07.15 + 01.30 (perjalanan) + 00.15 (istirahat) = 09.00 WIB. Total durasi = 1 jam 30 menit + 15 menit = 1 jam 45 menit. Jika tanpa istirahat = 07.15 + 01.30 = 08.45. (Opsi D salah).
+###
+###
+[WACANA: Lomba Cerdas Cermat Sains] SD Mutiara mengadakan Lomba Cerdas Cermat Sains antarkelas. Panitia menerapkan sistem penilaian yang ketat agar perlombaan berjalan kompetitif. Terdapat 3 babak dalam lomba ini, dan setiap soal memiliki batas waktu untuk dijawab. Tim yang menang adalah yang mampu mengumpulkan skor akhir tertinggi.
+[Tipe: BS] [IMG: Tabel sistem penilaian: Menjawab Benar (skor 4), Menjawab Salah (skor -1), Tidak Menjawab (skor 0)] Pada babak pertama, Tim Kelas 6A berhasil menjawab 8 soal dengan benar, 2 soal salah, dan 0 soal tidak dijawab. Tentukan Benar atau Salah dari pernyataan perhitungan skor berikut! | Total poin yang didapatkan Tim 6A adalah 30 poin (Benar) ~ Jika mereka menjawab semua 10 soal tersebut dengan benar, poin mereka adalah 40 (Benar) ~ Poin yang dikumpulkan Tim 6A adalah 34 poin (Salah) | - | 8 benar = 8 x 4 = 32 poin. 2 salah = 2 x (-1) = -2 poin. Total akhir = 32 - 2 = 30 poin. Jika benar semua = 10 x 4 = 40. (Pernyataan ketiga salah karena itu terjadi jika siswa lupa mengurangkan poin penalti jawaban salah, malah dijumlahkan atau dibiarkan 0).
+[Tipe: PGK] [IMG: Tabel perolehan skor 3 tim selama 3 babak. Tim Merah: Babak I (20), Babak II (30), Babak III (40). Tim Putih: Babak I (40), Babak II (20), Babak III (10). Tim Biru: Babak I (30), Babak II (30), Babak III (20)] Berdasarkan tabel perolehan skor tersebut, kesimpulan mana saja yang benar? | Tim Merah adalah juara pertama pada lomba cerdas cermat tersebut ~ Tren perolehan skor Tim Merah selalu mengalami kenaikan di setiap babak ~ Tim Putih memiliki tren skor yang semakin menurun dari awal hingga akhir ~ Tim Biru mendapatkan total skor yang sama dengan Tim Putih di akhir lomba | A, B, C | Total Merah (20+30+40=90). Total Putih (40+20+10=70). Total Biru (30+30+20=80). Merah menang, trennya naik terus. Putih trennya turun. (Opsi D salah karena total Biru 80, sedangkan Putih 70).
+[Tipe: PG] Pada babak rebutan, setiap tim hanya diberikan waktu maksimal selama 120 detik untuk berdiskusi dan menjawab satu soal. Berapakah batas waktu berpikir tersebut jika diubah ke dalam satuan menit? | 2 menit ~ 12 menit ~ 20 menit ~ 1,2 menit | A | Konversi detik ke menit dibagi 60. Maka 120 : 60 = 2 menit. (Opsi B salah karena siswa sekadar mencoret satu angka nol tanpa membaginya dengan 6).
+###
+###
+[WACANA: Panen Kebun Hidroponik Sekolah] Kelompok tani cilik kelas 6 baru saja memanen hasil kebun hidroponik di atap sekolah. Mereka berhasil menanam berbagai jenis sayuran segar tanpa pestisida. Hasil panen ini nantinya akan didata, sebagian dibagikan kepada guru dan siswa yang bertugas merawat, dan sisanya akan dijual ke kantin sekolah.
+[Tipe: PG] Hasil panen sayur kangkung hidroponik hari ini mencapai berat total 0,4 kuintal. Jika kantin sekolah meminta laporan berat panen dalam satuan kilogram, berapakah berat panen kangkung tersebut? | 40 kg ~ 4 kg ~ 400 kg ~ 0,04 kg | A | 1 kuintal sama dengan 100 kg. Maka 0,4 x 100 = 40 kg. (Opsi B salah karena siswa hanya memindahkan koma satu kali / dikali 10 seperti konversi satuan panjang berdekatan).
+[Tipe: PG] [IMG: Tabel hasil panen sayur (dalam ikat): Bayam (20 ikat), Sawi (15 ikat), Selada (25 ikat). Di bawahnya terdapat legenda piktogram: 1 gambar sehelai daun mewakili 5 ikat sayur] Siswa bertugas membuat laporan piktogram (diagram gambar) di papan tulis. Berapa banyak "gambar sehelai daun" yang harus digambar siswa untuk mewakili hasil panen sayur Selada? | 5 gambar daun ~ 25 gambar daun ~ 125 gambar daun ~ 20 gambar daun | A | Panen selada 25 ikat. Karena 1 gambar daun mewakili 5 ikat, maka 25 dibagi 5 = 5 gambar daun. (Opsi B salah karena siswa menggambar jumlah ikat mentah tanpa memperhatikan legenda; Opsi C salah malah dikalikan).
+[Tipe: PG] Dari total 40 ikat sayur bayam yang dipanen, sebanyak <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> bagian dibawa pulang oleh siswa yang piket kebun, dan <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math> bagian diberikan kepada guru-guru. Sisa sayur bayam tersebut akan diserahkan ke kantin. Berapa ikat sayur bayam yang diterima oleh pihak kantin? | 14 ikat ~ 26 ikat ~ 10 ikat ~ 16 ikat | A | Bagian siswa = <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> x 40 = 10 ikat. Bagian guru = <math><mfrac><mn>2</mn><mn>5</mn></mfrac></math> x 40 = 16 ikat. Total yang dibagikan = 10 + 16 = 26 ikat. Sisa untuk kantin = 40 - 26 = 14 ikat. (Opsi B salah karena itu adalah jumlah sayur yang dibagikan ke guru dan siswa, bukan sisanya).
+###
+###
+[WACANA: Bantuan Sosial Panti Asuhan] Menyambut bulan suci, siswa kelas 6 SD bersama komite sekolah mengumpulkan bantuan sosial sembako dan pakaian layak pakai. Bantuan tersebut akan dikemas rapi dan disalurkan ke sebuah panti asuhan di luar kota. Panitia perlu memperhitungkan wadah pengemasan, daya angkut kendaraan, serta biaya pengiriman agar bantuan tiba dengan aman.
+[Tipe: PGK] [IMG: Gambar 3 jenis kardus berbentuk balok. Kardus A (kecil): panjang 20 cm, lebar 10 cm, tinggi 10 cm. Kardus B (sedang): panjang 30 cm, lebar 20 cm, tinggi 15 cm. Kardus C (besar): panjang 40 cm, lebar 30 cm, tinggi 20 cm] Panitia ingin menggunakan kardus B untuk mengemas mie instan dan kardus C untuk mengemas minyak goreng. Berdasarkan ukuran kardus tersebut, manakah pernyataan perhitungan volume yang BENAR? | Volume kardus B adalah 9.000 cm3 ~ Volume kardus C adalah 24.000 cm3 ~ Volume kardus A adalah 200 cm3 ~ Selisih volume kardus B dan C adalah 15.000 cm3 | A, B, D | Volume balok = p x l x t. Kardus B = 30 x 20 x 15 = 9.000 cm3. Kardus C = 40 x 30 x 20 = 24.000 cm3. Selisih C dan B = 24.000 - 9.000 = 15.000 cm3. (Opsi C salah karena 20 x 10 x 10 = 2.000 cm3, bukan 200 ).
+[Tipe: PG] Panitia akan mengangkut karung beras sumbangan menggunakan mobil pick-up sekolah. Batas berat maksimal muatan yang diperbolehkan diangkut oleh bagasi mobil tersebut adalah 500 kg. Jika setiap karung beras memiliki berat 25 kg, berapa banyak jumlah karung beras maksimal yang bisa diangkut dalam satu kali perjalanan? | 20 karung ~ 25 karung ~ 50 karung ~ 12.500 karung | A | Maksimal karung = Batas muatan bagasi dibagi berat per karung = 500 : 25 = 20 karung. (Opsi D salah karena siswa malah mengalikan 500 dengan 25 ).
+[Tipe: PG] Panitia juga mengirimkan paket berisi baju layak pakai menggunakan jasa ekspedisi. Saat ditimbang, berat total kotak paket tersebut adalah 8 <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> kg. Pihak ekspedisi menetapkan tarif ongkos kirim sebesar Rp10.000,00 untuk setiap 1 kilogram. Berapa total ongkos kirim yang harus dibayar oleh panitia sekolah? | Rp85.000,00 ~ Rp80.000,00 ~ Rp80.500,00 ~ Rp18.500,00 | A | Pecahan 8 <math><mfrac><mn>1</mn><mn>2</mn></mfrac></math> kg senilai dengan 8,5 kg (8 setengah kilo). Biaya kirim = 8,5 x 10.000 = Rp85.000,00. (Opsi B salah karena siswa hanya menghitung angka utuh 8 kg dan mengabaikan pecahan setengahnya; Opsi C salah mengartikan pecahan setengah sebagai 500 rupiah ).
+###
+###
+[WACANA: Kegiatan Ekstrakurikuler Pramuka] Pasukan Pramuka Penggalang SD sedang mengadakan perkemahan Sabtu-Minggu (Persami). Setiap regu sibuk mendirikan tenda, merapikan perlengkapan seperti tongkat, dan menyiapkan bahan makanan hasil urunan anggota. Perkemahan ini bertujuan melatih kemandirian dan kerjasama tim.
+[Tipe: PG] [IMG: Denah perkemahan tanah lapang berbentuk persegi panjang dengan pola titik penempatan tenda. Baris ke-1 terdapat 2 tenda, baris ke-2 terdapat 4 tenda, dan baris ke-3 terdapat 6 tenda] Mengikuti pola susunan penempatan tenda pada denah tersebut, berapakah jumlah tenda yang akan didirikan panitia pada baris ke-4? | 8 tenda ~ 10 tenda ~ 7 tenda ~ 12 tenda | A | Pola barisan menunjukkan penambahan konsisten sebanyak 2 tenda di setiap baris (2, 4, 6, ...). Maka baris keempat = 6 + 2 = 8 tenda. (Opsi C salah jika siswa mengira baris ke-4 ditambah 1; Opsi D salah jika siswa mengalikan dengan 2 dari baris sebelumnya secara keliru ).
+[Tipe: PG] Panitia konsumsi menetapkan aturan rasio pembagian jatah beras mentah, yaitu 2 kg beras untuk setiap 1 regu yang beranggotakan 8 orang. Jika dalam satu pasukan pramuka tersebut terdapat 4 regu penggalang, berapa kilogram total pasokan beras yang dibutuhkan untuk seluruh pasukan itu? | 8 kg ~ 16 kg ~ 32 kg ~ 64 kg | A | Fokus pada rasionya, 1 regu = 2 kg beras. Jika ada 4 regu, maka 4 x 2 kg = 8 kg. (Opsi C salah karena siswa terjebak informasi jumlah anggota dan mengalikannya: 4 regu x 8 orang = 32 orang tanpa menggunakan rasionya ).
+[Tipe: BS] Pak Guru pembina pramuka memiliki sisa persediaan kayu di gudang sepanjang 400 cm. Anggota regu Garuda (terdiri dari 8 anak) melaporkan bahwa mereka lupa membawa tongkat. Jika standar tongkat pramuka adalah memiliki ukuran panjang 1,5 meter per batang, tentukan Benar atau Salah dari kesimpulan pembagian tongkat berikut! | Kayu sepanjang 400 cm tersebut cukup untuk membuatkan tongkat bagi seluruh anggota regu Garuda (Salah) ~ Panjang total tongkat yang dibutuhkan oleh seluruh anggota regu Garuda adalah 12 meter (Benar) ~ Pak Guru hanya bisa membuat 2 batang tongkat utuh dari sisa kayu tersebut (Benar) | - | Kebutuhan 1 regu = 8 anak x 1,5 m = 12 m. Sisa kayu = 400 cm = 4 meter. Jelas 4 meter tidak cukup (kurang) karena butuh 12 meter. Jumlah tongkat yang bisa dibuat = 4 meter dibagi 1,5 meter = 2 batang (total 3 m) dan masih sisa kayu 1 meter.
+###
+###
+[WACANA: Buka Puasa Bersama di Sekolah] Panitia OSIS SD sedang menyiapkan acara Buka Puasa Bersama di aula sekolah. Mereka membagi tugas untuk menyiapkan minuman segar, membagikan porsi makanan berbuka untuk seluruh peserta, dan mendata menu takjil apa saja yang disukai siswa agar tidak ada makanan yang terbuang sia-sia. Persiapan harus dilakukan dengan cepat dan cermat sebelum suara azan magrib berkumandang.
+[Tipe: PG] Panitia menyiapkan minuman es buah dalam sebuah wadah dispenser besar bervolume 12 liter. Jika es buah tersebut akan dibagi-bagi ke dalam gelas plastik berukuran mililiter (ml), berapakah volume total es buah tersebut dalam satuan mililiter? | 12.000 ml ~ 1.200 ml ~ 120.000 ml ~ 120 ml | A | Konversi liter ke mililiter dikali 1.000. Maka 12 x 1.000 = 12.000 ml. (Opsi B salah karena siswa mengira konversinya hanya turun dua tangga atau dikali 100).
+[Tipe: PG] Panitia mulai membungkus makanan tepat 45 menit sebelum waktu azan magrib tiba. Untuk membungkus satu porsi makanan, dibutuhkan waktu rata-rata <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> menit. Jika terdapat 160 porsi makanan yang harus dibungkus oleh tim, bagaimanakah hasil analisis waktu persiapannya? | Persiapan akan selesai 5 menit sebelum azan ~ Persiapan baru selesai tepat saat azan berkumandang ~ Persiapan terlambat 5 menit dari jadwal azan ~ Persiapan membutuhkan waktu 1 jam lebih | A | Waktu untuk 160 porsi = 160 x <math><mfrac><mn>1</mn><mn>4</mn></mfrac></math> = 40 menit. Karena panitia mulai 45 menit sebelum azan, maka 45 - 40 = ada jeda/sisa waktu 5 menit. Artinya mereka selesai 5 menit lebih cepat sebelum azan. (Opsi C salah jika siswa salah membagi 160 dengan 4).
+[Tipe: BS] [IMG: Diagram batang jenis takjil favorit: Kurma (45 siswa), Kolak (30 siswa), Es Buah (55 siswa), Gorengan (20 siswa)] Evaluasilah kebenaran pernyataan berikut berdasarkan data peminat menu takjil pada diagram batang! | Gorengan merupakan menu takjil yang paling sedikit peminatnya (Benar) ~ Selisih antara peminat Es Buah dan peminat Kolak adalah 15 siswa (Salah) | - | Batang Gorengan paling rendah (20 siswa), maka peminatnya paling sedikit. Untuk selisih Es buah (55) dan Kolak (30) adalah 55 - 30 = 25 siswa (bukan 15 siswa).
+###
+###
+[WACANA: Jadwal Piket Bersih-bersih] Kebersihan kelas adalah tanggung jawab bersama. Tiga orang siswa, yaitu Andi, Budi, dan Caca memiliki jadwal siklus piket kebersihan yang berbeda-beda. Selain mengatur jadwal agar tidak bentrok, wali kelas juga menugaskan ketua kelas untuk mengecek ketersediaan dan kelayakan alat-alat kebersihan agar kelas selalu nyaman untuk dipakai belajar.
+[Tipe: PG] [IMG: Kalender bulan Maret] Andi bertugas membuang sampah setiap 2 hari sekali, Budi menyapu setiap 3 hari sekali, dan Caca mengepel setiap 4 hari sekali. Jika pada tanggal 1 Maret mereka bertiga melakukan piket kebersihan bersama-sama, pada tanggal berapakah mereka akan piket bersama-sama lagi untuk yang kedua kalinya di bulan tersebut? | 13 Maret ~ 12 Maret ~ 24 Maret ~ 9 Maret | A | Dicari KPK dari siklus hari 2, 3, dan 4. KPK = 12 hari. Maka jadwal bersama berikutnya adalah 1 Maret + 12 hari = tanggal 13 Maret. (Opsi B salah karena siswa menjadikan nilai KPK langsung sebagai tanggal jatuh tempo tanpa menambahkannya dari tanggal awal pertemuan pertama).
+[Tipe: PGK] [IMG: Tabel kondisi inventaris alat kebersihan kelas. Sapu: 2 kondisi baik, 3 rusak. Kain Pel: 3 kondisi baik, 0 rusak. Kemoceng: 1 kondisi baik, 3 rusak] Berdasarkan tabel laporan inventaris tersebut, interpretasi pernyataan mana saja yang bernilai BENAR terkait alat yang perlu diganti baru? | Kelas perlu mengajukan pembelian sapu baru untuk mengganti 3 sapu yang rusak ~ Semua kain pel yang dimiliki kelas saat ini masih bisa digunakan dengan baik ~ Kemoceng adalah alat kebersihan yang kondisinya paling banyak baik ~ Secara keseluruhan, jumlah alat yang rusak lebih banyak dibandingkan yang kondisinya baik | A, B | Dari tabel jelas sapu ada 3 yang rusak. Kain pel 0 rusak (artinya baik semua). (Opsi C salah karena kemoceng yang baik hanya 1; Opsi D salah karena total alat baik = 2+3+1 = 6, dan total rusak = 3+0+3 = 6, jadi jumlahnya seimbang/sama banyak).
+[Tipe: PG] Halaman sekolah berbentuk persegi panjang dengan ukuran panjang 20 meter dan lebar 15 meter. Jika regu piket mampu menyapu halaman dengan kecepatan 10 meter persegi per menit, berapa menit perkiraan waktu yang dibutuhkan untuk menyapu seluruh halaman tersebut hingga bersih? | 30 menit ~ 300 menit ~ 70 menit ~ 150 menit | A | Hitung luas halaman dahulu: Luas = p x l = 20 m x 15 m = 300 meter persegi. Waktu tempuh = Luas dibagi kecepatan menyapu = 300 : 10 = 30 menit. (Opsi B salah karena itu adalah hasil Luas murni tanpa dibagi kecepatan waktu; Opsi C salah karena menggunakan rumus keliling).
+###
+###
+[WACANA: Merapikan Alat Olahraga] Setelah jam pelajaran Penjasorkes selesai, regu piket bertugas merapikan kembali alat-alat olahraga ke dalam ruang penyimpanan. Mereka harus menata kardus-kardus bola ke dalam lemari agar tidak berantakan, mengelompokkan bola berdasarkan beratnya, serta memilah kok bulu tangkis yang masih layak pakai.
+[Tipe: PG] [IMG: Sketsa lemari olahraga berbentuk balok berukuran panjang 120 cm, lebar 60 cm, dan tinggi 180 cm. Di sampingnya terdapat kardus bola berbentuk kubus dengan panjang rusuk 30 cm] Berapa banyak kardus bola maksimal yang dapat dimasukkan ke dalam lemari olahraga tersebut hingga penuh tanpa ada ruang kosong tersisa? | 48 kardus ~ 24 kardus ~ 96 kardus ~ 12 kardus | A | Volume lemari = 120 x 60 x 180 = 1.296.000 cm3. Volume kardus kubus = 30 x 30 x 30 = 27.000 cm3. Jumlah maksimal = 1.296.000 dibagi 27.000 = 48 kardus. Cara cepat membandingkan rusuk: (120:30) x (60:30) x (180:30) = 4 x 2 x 6 = 48 kardus. (Opsi B salah jika siswa salah menghitung rusuk tinggi 180:30 menjadi 3).
+[Tipe: PG] Saat merapikan alat, Budi mendata berat beberapa bola. Bola basket beratnya 0,6 kg, bola voli 260 gram, dan bola sepak 0,45 kg. Urutan jenis bola dari beban yang paling ringan hingga terberat adalah .... | Bola voli, bola sepak, bola basket ~ Bola sepak, bola voli, bola basket ~ Bola voli, bola basket, bola sepak ~ Bola basket, bola sepak, bola voli | A | Samakan satuan ke gram. Basket = 0,6 kg = 600 gram. Voli = 260 gram. Sepak = 0,45 kg = 450 gram. Urutan teringan: Voli (260 g), Sepak (450 g), Basket (600 g). (Opsi B salah karena siswa mengira 0,45 kg otomatis lebih kecil dari 260 gram tanpa melakukan konversi; Opsi D posisinya terbalik).
+[Tipe: PG] Pak Guru Penjasorkes menyatakan bahwa dari satu kotak berisi kok bulu tangkis yang baru, sebanyak <math><mfrac><mn>1</mn><mn>6</mn></mfrac></math> bagian bulunya rusak akibat lembap saat disimpan di gudang. Model matematika yang tepat untuk mengetahui sisa bagian kok yang masih bagus dan bisa dipakai adalah .... | 1 - <math><mfrac><mn>1</mn><mn>6</mn></mfrac></math> ~ 1 + <math><mfrac><mn>1</mn><mn>6</mn></mfrac></math> ~ <math><mfrac><mn>1</mn><mn>6</mn></mfrac></math> - 1 ~ <math><mfrac><mn>6</mn><mn>6</mn></mfrac></math> + <math><mfrac><mn>1</mn><mn>6</mn></mfrac></math> | A | Satu kotak utuh diwakili oleh angka 1. Sisa bagian yang bagus adalah total utuh dikurangi pecahan yang rusak. Maka modelnya adalah 1 - <math><mfrac><mn>1</mn><mn>6</mn></mfrac></math>. (Opsi B salah karena operasi penjumlahan bukan untuk mencari sisa; Opsi C posisinya terbalik).
+###
+###
+[WACANA: Catatan Kesehatan UKS] Petugas UKS (Usaha Kesehatan Sekolah) melakukan pemeriksaan rutin untuk memantau tumbuh kembang siswa kelas 6. Pemeriksaan meliputi pengukuran tinggi badan, penimbangan berat badan, serta pemeriksaan kondisi gigi dan mulut. Seluruh data tersebut dicatat dengan rapi agar mudah dilaporkan kepada pihak puskesmas.
+[Tipe: PGK] [IMG: Piktogram berat badan siswa kelas 6. Kategori 30-35 kg: 2 simbol orang. Kategori 36-40 kg: 4 simbol orang. Kategori 41-45 kg: 1 simbol orang setengah. Legenda di bawahnya: 1 simbol orang utuh = 4 anak] Berdasarkan piktogram tersebut, pernyataan mana saja yang menginterpretasikan data jumlah siswa dengan benar? | Jumlah anak yang beratnya 36-40 kg adalah 16 anak ~ Total siswa yang beratnya di bawah 41 kg adalah 24 anak ~ Anak yang berada di rentang 41-45 kg berjumlah 6 anak ~ Total seluruh siswa kelas 6 yang ditimbang adalah 10 anak | A, B, C | Kategori 30-35 kg = 2 x 4 = 8 anak. Kategori 36-40 kg = 4 x 4 = 16 anak. Di bawah 41 kg (gabungan kategori pertama dan kedua) = 8 + 16 = 24 anak. Kategori 41-45 kg = 1,5 x 4 = 6 anak. (Opsi D salah karena total anak yang ditimbang sebenarnya adalah 8+16+6 = 30 anak, bukan 10).
+[Tipe: BS] Pada catatan UKS, hasil ukur tinggi badan Caca adalah 1 meter 45 sentimeter. Sementara itu, tinggi badan Doni tercatat 1,32 meter. Evaluasilah kebenaran dari pernyataan selisih tinggi badan antarsiswa berikut ini! | Selisih tinggi badan Caca dan Doni adalah 13 cm (Benar) ~ Jika Doni bertambah tinggi 5 cm lagi, tinggi Doni tetap lebih pendek dari Caca (Benar) ~ Caca lebih pendek 13 cm dibandingkan Doni (Salah) | - | Tinggi Caca = 1 m 45 cm = 145 cm. Tinggi Doni = 1,32 m = 132 cm. Selisih = 145 dikurangi 132 = 13 cm. Jika Doni bertambah 5 cm menjadi 137 cm, ia tetap lebih pendek dari Caca. Caca adalah siswa yang lebih tinggi.
+[Tipe: PG] Hari ini ada jadwal pemeriksaan gigi lanjutan dari dokter puskesmas. Jika jumlah total siswa di kelas 6 adalah 30 anak dan didapatkan data bahwa sebanyak <math><mfrac><mn>2</mn><mn>3</mn></mfrac></math> bagian dari total siswa sudah diperiksa giginya kemarin, berapakah jumlah sisa anak yang belum diperiksa giginya? | 10 anak ~ 20 anak ~ 5 anak ~ 15 anak | A | Siswa yang sudah diperiksa = <math><mfrac><mn>2</mn><mn>3</mn></mfrac></math> x 30 = 20 anak. Sisa anak yang belum diperiksa = 30 dikurangi 20 = 10 anak. Atau menggunakan cara 1 - <math><mfrac><mn>2</mn><mn>3</mn></mfrac></math> = <math><mfrac><mn>1</mn><mn>3</mn></mfrac></math>, kemudian dikalikan 30 hasilnya 10 anak. (Opsi B salah karena angka 20 mewakili jumlah anak yang sudah diperiksa, bukan sisa anak yang belum).
+###
+###
+[WACANA: Tugas Prakarya Rumah-rumahan] Seni Budaya dan Keterampilan memberikan tugas proyek kelompok untuk membuat maket rumah-rumahan. Setiap kelompok harus menggambar jaring-jaring bangun ruang terlebih dahulu di atas kertas karton, menentukan skala ukuran yang proporsional, dan memotongnya dengan rapi menggunakan gunting sebelum merekatkannya menjadi bentuk rumah tiga dimensi yang kokoh.
+[Tipe: PG] [IMG: Jaring-jaring bangun ruang gabungan. Bagian tengah berupa jaring-jaring balok (persegi panjang) tanpa penutup atas, dan di ujungnya terhubung dengan 4 bangun segitiga yang membentuk jaring-jaring limas segi empat sebagai atap] Jika seluruh garis lipatan pada jaring-jaring tersebut dilipat dan direkatkan, bentuk bangun ruang gabungan maket rumah yang dihasilkan adalah .... | Balok dan Limas segi empat ~ Balok dan Prisma segitiga ~ Kubus dan Kerucut ~ Kubus dan Limas segitiga | A | Bagian badan rumah terbentuk dari balok (memiliki sisi persegi panjang), dan bagian atap yang meruncing dibentuk oleh 4 segitiga yang menyatu di atas menjadi limas segi empat. (Opsi B salah karena prisma segitiga tidak memiliki puncak yang meruncing di satu titik).
+[Tipe: PG] Maket rumah tersebut dibuat dengan skala rasio perbandingan <math><mfrac><mn>1</mn><mn>20</mn></mfrac></math>. Jika tinggi pintu pada maket rumah yang dibuat oleh kelompokmu diukur sepanjang 10 cm, berapakah tinggi pintu rumah tersebut pada ukuran yang sebenarnya? | 200 cm ~ 2 cm ~ 10 cm ~ 20 cm | A | Tinggi sebenarnya = Tinggi maket dibagi skala = 10 dibagi <math><mfrac><mn>1</mn><mn>20</mn></mfrac></math> = 10 x 20 = 200 cm. (Opsi B salah karena siswa mengalikan 10 dengan pecahan skala secara langsung sehingga menjadi 10 dibagi 20 = 0,5 cm atau dibulatkan 2; Opsi D salah karena hanya memindahkan angka penyebutnya saja).
+[Tipe: PG] [IMG: Sketsa selembar kertas karton berukuran 50 cm x 40 cm. Di dalamnya tergambar batas luar pemotongan jaring-jaring (perimeter) yang dibentuk oleh garis zig-zag dan lurus dengan rincian panjang sisi-sisi luarnya berturut-turut: 10 cm, 15 cm, 20 cm, 15 cm, 10 cm, 15 cm, 20 cm, dan 15 cm] Sebelum mulai menggunting, ketua kelompok memecahkan masalah keliling batas luar pemotongan jaring-jaring tersebut agar guntingan tidak melenceng. Berapakah keliling batas potongnya? | 120 cm ~ 180 cm ~ 60 cm ~ 2.000 cm | A | Keliling batas luar didapat dengan menjumlahkan seluruh ukuran panjang garis terluar yang akan digunting = 10 + 15 + 20 + 15 + 10 + 15 + 20 + 15 = 120 cm. (Opsi B salah karena itu adalah keliling kertas karton luar yang tidak ikut dipotong: 2x(50+40)=180; Opsi D salah karena itu rumus luas karton).
+###
+###
+[WACANA: Lomba Olahraga Tradisional] Memperingati Hari Kemerdekaan, sekolah menyelenggarakan Pekan Lomba Olahraga Tradisional antarkelas. Salah satu cabang yang paling meriah adalah tarik tambang dan balap karung estafet. Terdapat sistem poin di mana panitia mencatat setiap kemenangan, hasil seri, hingga kekalahan untuk menentukan klasemen juara umum di akhir perlombaan.
+[Tipe: PGK] [IMG: Diagram batang skor akhir lomba tarik tambang antarkelas. Kelas 6A: 15 poin, Kelas 6B: 10 poin, Kelas 6C: 25 poin, Kelas 6D: 20 poin] Berdasarkan diagram klasemen akhir tersebut, manakah interpretasi pernyataan yang BENAR mengenai posisi kelas? | Kelas 6C menjadi juara pertama dalam lomba tarik tambang tersebut ~ Kelas 6A menempati peringkat ketiga di bawah Kelas 6D ~ Selisih skor antara juara pertama dan posisi paling akhir adalah 15 poin ~ Kelas 6B meraih posisi kedua atau runner-up dalam klasemen akhir | A, B, C | Peringkat 1: 6C (25 poin), Peringkat 2: 6D (20 poin), Peringkat 3: 6A (15 poin), Terakhir: 6B (10 poin). Selisih juara 1 dan terakhir = 25 - 10 = 15 poin. (Opsi D salah karena 6B berada di posisi paling buncit, bukan juara kedua).
+[Tipe: PG] Pada cabang lomba balap karung, setiap tim bertanding sebanyak 5 kali. Panitia membuat aturan poin bilangan bulat: Menang mendapat nilai 3, Seri mendapat nilai 1, dan Kalah mendapat nilai -1. Tim Kelas 6A mencatat hasil: 3 kali menang, 1 kali seri, dan 1 kali kalah. Model matematika yang tepat untuk menghitung total perolehan nilai Tim Kelas 6A adalah .... | (3 x 3) + (1 x 1) + (1 x -1) ~ (3 + 3) + (1 + 1) + (1 - 1) ~ 3 + 1 - 1 ~ 3 x 3 x 1 x -1 | A | Model yang benar: (Jumlah menang dikali poin menang) ditambah (Jumlah seri dikali poin seri) ditambah (Jumlah kalah dikali poin kalah). (Opsi B salah karena prosedur di dalam tanda kurungnya menggunakan penjumlahan berulang yang nilainya beda).
+[Tipe: BS] Pada lomba lari estafet tradisional dengan batok kelapa, pelari terakhir Tim A mencapai garis finis dan menekan stopwatch pada catatan waktu 45 detik 300 milidetik. Sementara pelari terakhir Tim B finis pada catatan waktu 48 detik 500 milidetik. Evaluasilah pernyataan mengenai hasil lomba ini! | Selisih waktu kedatangan Tim A dan Tim B adalah 3 detik 200 milidetik (Benar) ~ Tim A berlari lebih cepat dibandingkan Tim B sehingga berhak menang (Benar) ~ Tim B tiba lebih dulu di garis finis dibandingkan Tim A (Salah) | - | Selisih = 48 detik 500 ms dikurangi 45 detik 300 ms = 3 detik 200 ms. Dalam balapan lari, waktu catatan stopwatch yang angkanya lebih kecil (45 detik) artinya berlari lebih cepat dan pasti tiba di finis lebih dahulu.
+###
+###
+[WACANA: Membuat Kue Ulang Tahun Ibu] Akhir pekan ini adalah hari ulang tahun Ibu. Ayah dan anak-anak berencana memberikan kejutan dengan membuat kue bolu cokelat spesial. Mereka sudah mencari resep di internet dan pergi ke warung terdekat untuk membeli beberapa bahan yang kurang. Mereka harus menakar bahan dengan pas agar rasa kuenya enak dan memilih loyang yang tepat agar adonan tidak meluber saat dipanggang di dalam oven.
+[Tipe: PG] [IMG: Tabel catatan resep takaran kue bolu. Tepung Terigu: 0,46 kilogram. Gula Pasir: 215 gram. Cokelat Bubuk: 50 gram] Saat hendak menimbang, timbangan digital rusak sehingga mereka menggunakan timbangan jarum biasa. Jika Ayah ingin menaksir total berat bahan tepung terigu dan gula pasir dengan membulatkannya ke ratusan gram terdekat, berapakah taksiran berat total kedua bahan tersebut? | 700 gram ~ 600 gram ~ 675 gram ~ 800 gram | A | Konversi tepung = 0,46 kg = 460 gram. Gula = 215 gram. Total asli = 460 + 215 = 675 gram. Dibulatkan ke ratusan terdekat, angka puluhannya 7 (lebih dari 5), maka dibulatkan ke atas menjadi 700 gram. (Opsi B salah karena siswa membulatkan ke bawah; Opsi C salah karena belum ditaksir/dibulatkan).
+[Tipe: PG] Di warung, harga tepung terigu adalah Rp11.500,00 dan harga mentega adalah Rp15.500,00. Jika anak-anak hanya membawa 3 lembar uang pecahan sepuluh ribuan dari celengan mereka, masalah manakah yang merupakan estimasi paling tepat terkait total belanja mereka? | Total belanja adalah Rp27.000,00 dan sisa kembalian uang mereka adalah Rp3.000,00 ~ Uang mereka kurang Rp3.000,00 untuk membayar belanjaan ~ Total belanja adalah Rp26.000,00 dan kembaliannya Rp4.000,00 ~ Uang sepuluh ribuan yang dibawa tidak bisa digunakan karena kurang | A | Total belanja = 11.500 + 15.500 = Rp27.000,00. Uang yang dibawa = 3 x 10.000 = Rp30.000,00. Sisa = 30.000 dikurangi 27.000 = Rp3.000,00. (Opsi B salah karena siswa salah menjumlahkan sehingga mengira uangnya kurang).
+[Tipe: BS] [IMG: Sketsa dua jenis wadah loyang. Loyang A berbentuk balok dengan panjang 20 cm, lebar 10 cm, tinggi 7 cm. Loyang B berbentuk tabung dengan jari-jari 10 cm dan tinggi 5 cm (Gunakan pi = 3,14)] Setelah adonan kue selesai dikocok, volume total adonan tersebut adalah 1.500 cm3. Evaluasilah kebenaran dari pernyataan berikut dalam memilih loyang! | Jika adonan dituang ke Loyang A, maka adonannya akan tumpah meluber keluar (Benar) ~ Loyang B adalah pilihan yang paling aman karena volumenya mampu menampung 1.570 cm3 adonan (Benar) ~ Volume kapasitas Loyang A lebih besar dibandingkan Loyang B (Salah) | - | Volume Balok (Loyang A) = p x l x t = 20 x 10 x 7 = 1.400 cm3. Karena adonan 1.500 cm3, maka Loyang A akan meluber (Benar). Volume Tabung (Loyang B) = pi x r x r x t = 3,14 x 100 x 5 = 1.570 cm3 (Aman, muat menampung). Pernyataan ketiga salah karena 1.400 < 1.570.
+###
+###
+[WACANA: Pojok Baca di Ruang Kelas] Wali kelas 6 meresmikan Pojok Baca di bagian belakang ruang kelas yang diisi dengan rak buku kecil. Setiap siswa diperbolehkan meminjam buku cerita selama jam istirahat. Untuk menjaga kedisiplinan dan merawat inventaris, guru menerapkan aturan administrasi peminjaman dan denda yang tegas jika ada halaman buku yang sengaja dirusak atau disobek.
+[Tipe: PG] [IMG: Grafik garis (line chart) tren peminjaman buku selama 1 bulan. Titik data berturut-turut di Minggu 1, 2, 3, dan 4. Buku Fabel (5, 10, 15, 20). Buku Sejarah (20, 15, 10, 5). Buku Petualangan (15, 20, 25, 30)] Berdasarkan tren pada grafik histori tersebut, kesimpulan yang paling tepat mengenai buku cerita terfavorit di kelas adalah .... | Buku Petualangan adalah yang terfavorit karena total peminjamannya mencapai 90 kali ~ Buku Fabel adalah yang terfavorit karena grafiknya selalu naik ~ Buku Sejarah adalah yang terfavorit karena paling banyak dipinjam pada minggu pertama ~ Buku Petualangan dan Fabel sama-sama menjadi terfavorit karena trennya naik | A | Cari total keseluruhan untuk menyimpulkan "terfavorit". Petualangan = 15+20+25+30 = 90. Fabel = 5+10+15+20 = 50. Sejarah = 20+15+10+5 = 50. (Opsi B salah karena meski grafiknya naik, total kumulatifnya masih kalah dengan Petualangan).
+[Tipe: PG] Aturan denda Pojok Baca menetapkan bahwa jika seorang siswa merobek halaman buku, ia harus membayar uang denda sebesar <math><mfrac><mn>1</mn><mn>5</mn></mfrac></math> bagian dari uang saku hariannya per buku yang dirusak. Jika Doni yang memiliki uang saku Rp15.000,00 merusak 2 buah buku, model operasi matematika yang tepat untuk menghitung total dendanya adalah .... | 2 x (<math><mfrac><mn>1</mn><mn>5</mn></mfrac></math> x 15.000) ~ 2 + (<math><mfrac><mn>1</mn><mn>5</mn></mfrac></math> x 15.000) ~ (<math><mfrac><mn>1</mn><mn>5</mn></mfrac></math> + 15.000) x 2 ~ <math><mfrac><mn>1</mn><mn>5</mn></mfrac></math> x 15.000 : 2 | A | Denda 1 buku adalah (<math><mfrac><mn>1</mn><mn>5</mn></mfrac></math> dikali 15.000). Karena ada 2 buku, maka dikalikan 2. Model yang benar menggunakan tanda kurung untuk mendahulukan perhitungan denda per satuan buku. (Opsi B salah karena itu operasi penjumlahan bukan pelipatgandaan jumlah buku).
+[Tipe: PG] Rak buku di Pojok Baca memiliki panjang sekat dalam 60 cm. Petugas perpustakaan mengukur bahwa rata-rata satu buah buku cerita memiliki ketebalan punggung 15 milimeter (mm). Jika buku disusun mendatar secara rapat, berapa batas kapasitas maksimal susunan buku di rak tersebut? | 40 buku ~ 4 buku ~ 400 buku ~ 25 buku | A | Samakan satuan ukuran. Panjang rak 60 cm = 600 mm. Kapasitas rak = Panjang total dibagi tebal buku = 600 dibagi 15 = 40 buku. (Opsi B salah karena siswa membagi 60 cm dengan 15 mm secara langsung tanpa menyamakan satuannya).
+###
+###
+[WACANA: Acara Jalan Sehat Semarak] Desa Sukamakmur mengadakan acara Jalan Sehat Semarak yang diikuti oleh siswa SD beserta warga sekitar. Panitia telah mencetak tiket kupon doorprize dan mendirikan tenda stan yang menjual berbagai pernak-pernik, termasuk kaos seragam bertema jalan sehat. Seluruh peserta tampak antusias mengikuti rute perjalanan yang mengelilingi batas desa sejak pagi hari.
+[Tipe: PG] [IMG: Tabel daftar harga di stan panitia. Kaos Dewasa: Rp60.000,00. Kaos Anak-anak: Rp40.000,00. Terdapat stiker diskon bertuliskan "Diskon 15% untuk pembelian Hari Ini!"] Jika seorang siswa SD membeli satu buah kaos anak-anak pada hari itu, berapa tagihan bersih yang harus dibayarkannya setelah dikenakan operasi pengurangan diskon? | Rp34.000,00 ~ Rp6.000,00 ~ Rp40.000,00 ~ Rp36.000,00 | A | Besar diskon = 15% dari Rp40.000 = <math><mfrac><mn>15</mn><mn>100</mn></mfrac></math> x 40.000 = Rp6.000,00. Tagihan bersih yang dibayar = Harga awal dikurangi diskon = 40.000 - 6.000 = Rp34.000,00. (Opsi B salah karena itu hanya potongan diskonnya saja; Opsi D salah akibat kesalahan hitung pengurangan).
+[Tipe: PG] Pak Kades meresmikan rute jalan sehat yang dimulai dari lapangan desa, berjalan menyusuri jalan raya sejauh 2,5 kilometer, lalu masuk ke jalan perkampungan sejauh 150 dekameter, sebelum akhirnya kembali ke lapangan. Jika ditotal secara keseluruhan, berapa meter jarak rute yang dilalui oleh peserta? | 4.000 meter ~ 2.650 meter ~ 2.515 meter ~ 400 meter | A | Konversi semua satuan ke meter. 2,5 kilometer = 2.500 meter. 150 dekameter = 1.500 meter. Total rute tempuh = 2.500 + 1.500 = 4.000 meter. (Opsi B salah karena siswa salah mengira 150 dam itu 150 meter).
+[Tipe: PGK] [IMG: Diagram Piktogram jumlah kupon undian doorprize perwakilan kelas SD. Keterangan: 1 gambar bintang = 10 lembar kupon. Kelas 4: 3 bintang. Kelas 5: 6 bintang penuh dan 1 setengah bintang. Kelas 6: 5 bintang penuh] Panitia akan menarik satu buah kupon secara acak dari dalam kotak undian. Berdasarkan piktogram jumlah kupon yang terkumpul, manakah evaluasi pernyataan yang BENAR mengenai peluang kelas yang menang? | Kelas 5 paling berpeluang memenangkan undian dibandingkan kelas lainnya ~ Total kupon yang dikumpulkan oleh Kelas 6 adalah 50 lembar ~ Kelas 4 memiliki peluang menang paling kecil karena hanya memiliki 30 lembar kupon ~ Selisih kupon Kelas 5 dan Kelas 6 adalah 10 lembar | A, B, C | Kelas 5 punya 6,5 bintang x 10 = 65 kupon (terbanyak, peluang terbesar). Kelas 6 punya 5 x 10 = 50 kupon. Kelas 4 punya 3 x 10 = 30 kupon (paling sedikit). (Opsi D salah karena selisih Kelas 5 dan Kelas 6 adalah 65 dikurangi 50 = 15 lembar kupon).
+###
+###
+[WACANA: Tugas Pengamatan Tanaman] Guru IPA menugaskan siswa untuk menanam biji kacang hijau dan mengamati proses perkecambahannya setiap hari. Siswa diminta rutin menyiram pot tanaman dengan jumlah air yang pas agar kecambah tidak membusuk. Selain itu, mereka harus mencatat tinggi tanaman dan menyeleksi bibit mana saja yang gagal tumbuh dengan baik untuk nantinya dipisahkan dari pot utama.
+[Tipe: PG] [IMG: Grafik Garis (Line Chart) pertumbuhan tanaman kacang hijau. Sumbu horizontal menunjukkan Hari, sumbu vertikal menunjukkan Tinggi (cm). Titik data: Hari ke-1 berada di angka 2. Hari ke-3 berada di angka 5. Hari ke-5 berada di angka 9] Caca bertugas menyalin data grafik garis kelompoknya menjadi sebuah tabel observasi. Pemodelan tren kenaikan pada tabel mana di bawah ini yang paling sesuai dengan grafik di atas? | Hari 1: 2 cm ~ Hari 3: 5 cm ~ Hari 5: 9 cm | Hari 1: 0 cm ~ Hari 3: 2 cm ~ Hari 5: 5 cm | Hari 1: 2 cm ~ Hari 2: 5 cm ~ Hari 3: 9 cm | Hari 1: 5 cm ~ Hari 3: 9 cm ~ Hari 5: 14 cm | A | Model tabel yang benar harus persis sama dengan koordinat sumbu X dan Y pada grafik. Hari 1 tinggi 2 cm, Hari 3 tinggi 5 cm, dan Hari 5 tinggi 9 cm. (Opsi C salah karena sumbu harinya berurutan padahal di grafik melompat; Opsi B salah mengurutkan titik potong).
+[Tipe: PG] Budi memiliki jadwal menyiram kecambah dua kali sehari, yaitu pada pagi hari selama 30 detik dan sore hari selama 30 detik. Jika Budi melakukan rutinitas penyiraman ini tanpa absen selama satu minggu penuh, berapa total waktu perawatan penyiraman yang dilakukan Budi dalam hitungan menit? | 7 menit ~ 210 menit ~ 60 menit ~ 3,5 menit | A | Total waktu per hari = 30 detik + 30 detik = 60 detik (atau 1 menit). Dalam satu minggu (7 hari), total waktunya adalah 1 menit x 7 hari = 7 menit. (Opsi B salah karena siswa mengalikan 30 dengan 7 hari tanpa mengubah satuan detik menjadi menit lalu lupa menambah penyiraman sore; Opsi D salah karena hanya menghitung penyiraman satu kali sehari).
+[Tipe: BS] Kelompok Dedi menabur sebanyak 40 butir biji kacang hijau di media kapas. Setelah seminggu diamati, ternyata sebanyak <math><mfrac><mn>1</mn><mn>8</mn></mfrac></math> bagian dari keseluruhan biji tersebut berjamur dan gagal tumbuh menjadi tanaman. Tentukan Benar atau Salah dari kesimpulan akhir sisa tanaman berikut ini! | Banyaknya tanaman kacang hijau yang berhasil tumbuh dan siap dipindahkan ke tanah pot adalah 35 buah (Benar) ~ Biji kacang hijau yang mengalami gagal tumbuh dan harus dibuang berjumlah 5 buah (Benar) ~ Jumlah tanaman yang gagal lebih banyak dibandingkan yang berhasil tumbuh (Salah) | - | Biji gagal tumbuh = <math><mfrac><mn>1</mn><mn>8</mn></mfrac></math> x 40 = 5 buah (Pernyataan kedua Benar). Biji yang berhasil = Total awal dikurangi yang gagal = 40 - 5 = 35 buah (Pernyataan pertama Benar). Pernyataan ketiga Salah karena 5 buah jelas lebih sedikit dibandingkan 35 buah tanaman yang berhasil.
+###
+`;
+
+        // ==========================================
+        // SISTEM PARSING & MIXER
+        // ==========================================
+        let bankSingle = [];
+        let bankCluster = [];
+        let finalQuestionList = [];
+        let userAnswers = {}; 
+        let currentQuestionIndex = 0;
+        let examTimer;
+        let timeLeft = WAKTU_MENIT * 60;
+        let appState = 'login';
+        let cheatWarnings = 0;
+
+        // Inisialisasi Judul UI
+        document.getElementById('appTitle').innerText = JUDUL_KUIS;
+        document.getElementById('loginTitle').innerText = JUDUL_KUIS;
+
+        // Markdown Renderer
+        function parseFormat(text) {
+            if (!text) return '';
+            let formatted = text.replace(/\n/g, '<br>');
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            return formatted;
+        }
+
+        // Pembersih Teks (Auto-Cleaner)
+        function cleanQuestionText(text) {
+            let cleaned = text.replace(/\[Tipe:\s*(PG|PGK|BS)\]/gi, '');
+            cleaned = cleaned.replace(/\[(PG|PGK|BS)\]/gi, '');
+            cleaned = cleaned.replace(/^\s*\d+[a-zA-Z]?[\.\)]\s*/, '');
+            cleaned = cleaned.replace(/\[IMG:\s*(.*?)\]/gi, '<br><img src="$1" class="img-question" alt="Ilustrasi"><br>');
+            return parseFormat(cleaned.trim());
+        }
+
+        // Parsing Raw Data
+        function parseData() {
+            // Parsing Single
+            const singleParts = RAW_SINGLE.split(/(?=\[Tipe:)/).filter(s => s.trim() !== '');
+            singleParts.forEach((part, id) => {
+                let sections = part.split('|');
+                if(sections.length >= 4) {
+                    let typeMatch = sections[0].match(/\[Tipe:\s*(PG|PGK|BS)\]/i);
+                    let type = typeMatch ? typeMatch[1].toUpperCase() : 'PG';
+                    let qText = sections[0];
+                    let rawOptions = sections[1].split('~').map(o => o.trim());
+                    
+                    let qObj = {
+                        id: 'S' + id,
                         type: type,
-                        text: formatText(parts[0]),
-                        optionsRaw: parts[1],
-                        key: parts[2],
-                        explanation: parts[3] || "Tidak ada pembahasan."
-                    });
-                }
-            }
+                        wacana: '',
+                        question: cleanQuestionText(qText),
+                        options: rawOptions,
+                        key: sections[2].trim(),
+                        explanation: parseFormat(sections[3].trim())
+                    };
 
-            if (questions.length > 0) {
-                parsedClusters.push({
-                    wacanaTitle: wacanaTitle,
-                    wacanaContent: wacanaFull,
-                    questions: questions
+                    if(type === 'BS') {
+                        qObj.bsData = rawOptions.map(opt => {
+                            let match = opt.match(/(.*?)\s*\((Benar|Salah)\)/i);
+                            return {
+                                statement: match ? match[1].trim() : opt.trim(),
+                                correct: match ? match[2].trim() : ''
+                            };
+                        });
+                    }
+                    bankSingle.push(qObj);
+                }
+            });
+
+            // Parsing Cluster
+            const clusterBlocks = RAW_CLUSTER.split('###').filter(b => b.trim() !== '');
+            clusterBlocks.forEach((block, cId) => {
+                let parts = block.split(/(?=\[Tipe:)/i);
+                let headerPart = parts.shift();
+                
+                let wacanaTitle = "";
+                let wacanaText = headerPart;
+                let wMatch = headerPart.match(/\[WACANA:\s*(.*?)\]([\s\S]*)/i);
+                if(wMatch) {
+                    wacanaTitle = wMatch[1].trim();
+                    wacanaText = wMatch[2].trim();
+                }
+
+                let finalWacanaHTML = wacanaTitle ? `<div class="wacana-title">[WACANA: ${wacanaTitle}]</div>${parseFormat(wacanaText)}` : parseFormat(wacanaText);
+                
+                let clObj = { id: 'C'+cId, wacana: finalWacanaHTML, questions: [] };
+
+                parts.forEach((part, qId) => {
+                    let sections = part.split('|');
+                    if(sections.length >= 4) {
+                        let typeMatch = sections[0].match(/\[Tipe:\s*(PG|PGK|BS)\]/i);
+                        let type = typeMatch ? typeMatch[1].toUpperCase() : 'PG';
+                        let rawOptions = sections[1].split('~').map(o => o.trim());
+                        
+                        let qObj = {
+                            id: 'C'+cId+'_Q'+qId,
+                            type: type,
+                            wacana: clObj.wacana,
+                            question: cleanQuestionText(sections[0]),
+                            options: rawOptions,
+                            key: sections[2].trim(),
+                            explanation: parseFormat(sections[3].trim())
+                        };
+
+                        if(type === 'BS') {
+                            qObj.bsData = rawOptions.map(opt => {
+                                let match = opt.match(/(.*?)\s*\((Benar|Salah)\)/i);
+                                return { statement: match ? match[1].trim() : opt.trim(), correct: match ? match[2].trim() : '' };
+                            });
+                        }
+                        clObj.questions.push(qObj);
+                    }
                 });
-            }
-        });
-
-        return parsedClusters;
-    }
-
-    // Helper: Ubah [IMG: ...] jadi div placeholder
-    function formatText(text) {
-        return text.replace(/\[IMG:\s*(.*?)\]/g, '<div class="img-placeholder">📷 GAMBAR: $1</div>')
-                   .replace(/\n/g, '<br>');
-    }
-
-    // --- 2. CLUSTER SHUFFLE ENGINE (CORE LOGIC) ---
-    function initQuizEngine() {
-        const clusters = parseData(RAW_DATA);
-        
-        // Tahap A: Acak Urutan Cluster
-        shuffleArray(clusters);
-
-        let finalPool = [];
-        
-        // Tahap B & C: Filter & Limit
-        for (let cluster of clusters) {
-            if (finalPool.length >= TARGET_TOTAL_SOAL) break;
-
-            // Acak soal dalam cluster ini
-            shuffleArray(cluster.questions);
-
-            // Ambil 1 sampai MAX_SOAL (e.g., 2)
-            // Tapi jangan ambil lebih dari sisa kuota global
-            let remainingQuota = TARGET_TOTAL_SOAL - finalPool.length;
-            let takeCount = Math.min(cluster.questions.length, MAX_SOAL_PER_CLUSTER, remainingQuota);
-            
-            // Minimal ambil 1 jika tersedia
-            if (takeCount < 1 && cluster.questions.length > 0 && remainingQuota > 0) takeCount = 1;
-
-            let selectedQuestions = cluster.questions.slice(0, takeCount);
-
-            // Gabungkan data wacana ke setiap soal agar UI konsisten
-            selectedQuestions.forEach(q => {
-                q.wacanaRef = { title: cluster.wacanaTitle, content: cluster.wacanaContent };
-                finalPool.push(q);
+                if(clObj.questions.length > 0) bankCluster.push(clObj);
             });
         }
 
-        allQuestions = finalPool;
-        console.log("Total Soal Tergenerasi:", allQuestions.length);
-    }
-
-    // Fisher-Yates Shuffle
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-
-    // --- 3. UI RENDERING ---
-    function renderQuestion() {
-        if (currentIndex >= allQuestions.length) {
-            finishQuiz();
-            return;
-        }
-
-        const q = allQuestions[currentIndex];
-        
-        // Update Wacana (Only if content exists)
-        const wPanel = document.getElementById('wacanaPanel');
-        if (q.wacanaRef.content && q.wacanaRef.content.length > 10) {
-            wPanel.classList.remove('hidden');
-            // Cek apakah wacana sama dengan sebelumnya untuk hindari flicker (opsional), 
-            // tapi di sini kita render ulang saja untuk aman.
-            document.getElementById('wacanaContent').innerHTML = `
-                <h3 style="color:var(--primary); margin-top:0;">${q.wacanaRef.title}</h3>
-                <div style="line-height:1.6;">${q.wacanaRef.content}</div>
-            `;
-        } else {
-            wPanel.classList.add('hidden'); // Sembunyikan panel jika tidak ada wacana
-        }
-
-        // Update Question
-        document.getElementById('qNumber').innerText = `Soal ${currentIndex + 1} / ${allQuestions.length}`;
-        document.getElementById('qTypeBadge').innerText = q.type;
-        document.getElementById('qContent').innerHTML = q.text;
-
-        // Render Options
-        const optionsContainer = document.getElementById('optionsList');
-        optionsContainer.innerHTML = '';
-
-        // Logic memecah opsi string "A, B, C, D" atau "Kalimat 1 (Benar), Kalimat 2 (Salah)"
-        let optionsArr = [];
-        
-        if (q.type === 'BS') {
-            // BS Special Parsing: "Pernyataan (Status), Pernyataan (Status)"
-            optionsArr = q.optionsRaw.split(',').map(o => {
-                let text = o.trim();
-                let isTrue = text.toLowerCase().includes('(benar)');
-                let cleanText = text.replace(/\((benar|salah)\)/i, '').trim();
-                return { text: cleanText, val: isTrue, isBS: true };
-            });
-        } else {
-            // PG & PGK: "Op A, Op B, Op C"
-            optionsArr = q.optionsRaw.split(',').map((o, idx) => {
-                const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                let val = letters[idx];
-                // Jika kunci jawaban pakai teks penuh, sesuaikan value-nya, tapi disini kita asumsikan A,B,C,D
-                // Kecuali user formatnya "Jawaban A, Jawaban B".
-                // Kita pakai Index huruf sebagai value standar.
-                return { text: o.trim(), val: val, isBS: false };
-            });
-        }
-
-        optionsArr.forEach((opt, idx) => {
-            const li = document.createElement('li');
-            li.className = 'option-item';
+        // Mixer Engine
+        function generateMixer() {
+            const shuffle = (array) => { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } };
             
-            let inputType = (q.type === 'PGK' || q.type === 'BS') ? 'checkbox' : 'radio';
-            let inputName = 'soal_opt';
-            
-            li.innerHTML = `
-                <input type="${inputType}" name="${inputName}" class="option-input" value="${opt.val}" id="opt_${idx}">
-                <label for="opt_${idx}" style="cursor:pointer; width:100%;">${opt.text} ${opt.isBS ? '<span style="font-size:0.8em; color:#888;">[Benar/Salah]</span>' : ''}</label>
-            `;
-            
-            // Klik baris = klik input
-            li.onclick = (e) => {
-                if (e.target.tagName !== 'INPUT') {
-                    document.getElementById(`opt_${idx}`).click();
-                }
-                // Highlight visual
-                document.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
-                if(inputType === 'radio') li.classList.add('selected');
-                else {
-                     // Checkbox logic highlighting
-                     if(document.getElementById(`opt_${idx}`).checked) li.classList.add('selected');
-                     else li.classList.remove('selected');
-                }
+            shuffle(bankSingle);
+            shuffle(bankCluster);
+
+            const getSingle = (count) => {
+                let res = [];
+                for(let i=0; i<count; i++) { if(bankSingle.length > 0) res.push(bankSingle.shift()); }
+                return res;
             };
 
-            optionsContainer.appendChild(li);
+            const getCluster = (count) => {
+                let res = [];
+                for(let i=0; i<bankCluster.length; i++) {
+                    let cl = bankCluster[i];
+                    let toTake = Math.min(cl.questions.length, 2, count - res.length);
+                    for(let j=0; j<toTake; j++) {
+                        let qIdx = Math.floor(Math.random() * cl.questions.length);
+                        res.push(cl.questions.splice(qIdx, 1)[0]);
+                    }
+                    if(res.length >= count) break;
+                }
+                bankCluster = bankCluster.filter(c => c.questions.length > 0);
+                return res;
+            };
+
+            finalQuestionList.push(...getSingle(3)); // 1-3
+            finalQuestionList.push(...getCluster(7)); // 4-10
+            finalQuestionList.push(...getSingle(3)); // 11-13
+            finalQuestionList.push(...getCluster(7)); // 14-20
+            
+            let remaining = TARGET_TOTAL_SOAL - finalQuestionList.length;
+            let takeCl = Math.floor(remaining / 2);
+            finalQuestionList.push(...getCluster(takeCl));
+            finalQuestionList.push(...getSingle(TARGET_TOTAL_SOAL - finalQuestionList.length));
+
+            while(finalQuestionList.length < TARGET_TOTAL_SOAL && bankSingle.length > 0) {
+                finalQuestionList.push(bankSingle.shift());
+            }
+        }
+
+        // ==========================================
+        // UI & INTERAKSI APLIKASI
+        // ==========================================
+        function togglePin() {
+            let input = document.getElementById("pinInput");
+            if (input.type === "password") { input.type = "text"; } else { input.type = "password"; }
+        }
+
+        function startExam() {
+            let input = document.getElementById("pinInput").value.trim().toUpperCase();
+            if(input === PIN_AKSES.toUpperCase()) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('appScreen').classList.remove('hidden');
+                
+                parseData();
+                generateMixer();
+                buildGrid();
+                appState = 'playing';
+                startTimer();
+                renderQuestion(0);
+            } else {
+                document.getElementById('pinError').style.display = 'block';
+            }
+        }
+
+        function buildGrid() {
+            let gridHtml = '';
+            for(let i = 0; i < finalQuestionList.length; i++) {
+                gridHtml += `<div class="grid-item" id="grid-${i}" onclick="renderQuestion(${i})">${i + 1}</div>`;
+            }
+            document.getElementById('cbtGrid').innerHTML = gridHtml;
+        }
+
+        function updateGridStatus() {
+            for(let i = 0; i < finalQuestionList.length; i++) {
+                let el = document.getElementById(`grid-${i}`);
+                el.classList.remove('active');
+                if(userAnswers[i] && Object.keys(userAnswers[i]).length > 0) el.classList.add('answered');
+                if(i === currentQuestionIndex) el.classList.add('active');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function renderQuestion(index) {
+            currentQuestionIndex = index;
+            let q = finalQuestionList[index];
+            let html = '';
+
+            if(q.wacana) {
+                html += `<div class="wacana-box">${q.wacana}</div>`;
+            }
+
+            let tipeLabel = q.type;
+            if (q.type === 'PGK') tipeLabel = 'PGK (Pilih Lebih Dari 1)';
+            else if (q.type === 'BS') tipeLabel = 'Benar/Salah';
+
+            html += `
+                <div class="question-header">
+                    <span>Soal ${index + 1} / ${finalQuestionList.length}</span>
+                    <span style="background:var(--accent); color:var(--primary); padding:3px 10px; border-radius:12px; font-size:12px;">Tipe: ${tipeLabel}</span>
+                </div>
+                <div class="question-body">
+                    <p style="margin-top:0;">${q.question}</p>
+            `;
+
+            const labels = ['A', 'B', 'C', 'D', 'E'];
+            
+            if(q.type === 'PG') {
+                q.options.forEach((opt, idx) => {
+                    let isChecked = (userAnswers[index] === labels[idx]) ? 'checked' : '';
+                    html += `
+                        <label class="option-label ${isChecked ? 'selected' : ''}">
+                            <input type="radio" name="opt_${index}" value="${labels[idx]}" onchange="saveAnswer(${index}, '${labels[idx]}')" ${isChecked}>
+                            <strong>${labels[idx]}.</strong> ${parseFormat(opt)}
+                        </label>
+                    `;
+                });
+            } else if(q.type === 'PGK') {
+                let savedArr = userAnswers[index] || [];
+                q.options.forEach((opt, idx) => {
+                    let isChecked = savedArr.includes(labels[idx]) ? 'checked' : '';
+                    html += `
+                        <label class="option-label ${isChecked ? 'selected' : ''}">
+                            <input type="checkbox" name="opt_${index}" value="${labels[idx]}" onchange="savePGK(${index}, '${labels[idx]}')" ${isChecked}>
+                            ${parseFormat(opt)}
+                        </label>
+                    `;
+                });
+            } else if(q.type === 'BS') {
+                let savedBS = userAnswers[index] || {};
+                html += `<table class="bs-table">
+                            <thead><tr><th>Pernyataan</th><th>Benar</th><th>Salah</th></tr></thead>
+                            <tbody>`;
+                q.bsData.forEach((item, idx) => {
+                    let valBenar = savedBS[idx] === 'Benar' ? 'checked' : '';
+                    let valSalah = savedBS[idx] === 'Salah' ? 'checked' : '';
+                    html += `<tr>
+                                <td>${parseFormat(item.statement)}</td>
+                                <td><input type="radio" class="bs-radio" name="bs_${index}_${idx}" value="Benar" onchange="saveBS(${index}, ${idx}, 'Benar')" ${valBenar}></td>
+                                <td><input type="radio" class="bs-radio" name="bs_${index}_${idx}" value="Salah" onchange="saveBS(${index}, ${idx}, 'Salah')" ${valSalah}></td>
+                             </tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+
+            html += `</div>`;
+            document.getElementById('questionCard').innerHTML = html;
+            updateGridStatus();
+
+            document.getElementById('btnPrev').style.visibility = (index === 0) ? 'hidden' : 'visible';
+            if(index === finalQuestionList.length - 1) {
+                document.getElementById('btnNext').classList.add('hidden');
+                document.getElementById('btnSubmit').classList.remove('hidden');
+            } else {
+                document.getElementById('btnNext').classList.remove('hidden');
+                document.getElementById('btnSubmit').classList.add('hidden');
+            }
+        }
+
+        function navigate(dir) {
+            let newIndex = currentQuestionIndex + dir;
+            if(newIndex >= 0 && newIndex < finalQuestionList.length) renderQuestion(newIndex);
+        }
+
+        function saveAnswer(qIndex, val) {
+            userAnswers[qIndex] = val;
+            renderQuestion(qIndex); 
+        }
+
+        function savePGK(qIndex, val) {
+            if(!userAnswers[qIndex]) userAnswers[qIndex] = [];
+            let arr = userAnswers[qIndex];
+            if(arr.includes(val)) {
+                arr.splice(arr.indexOf(val), 1);
+            } else {
+                arr.push(val);
+            }
+            if(arr.length === 0) delete userAnswers[qIndex];
+            renderQuestion(qIndex);
+        }
+
+        function saveBS(qIndex, stmtIndex, val) {
+            if(!userAnswers[qIndex]) userAnswers[qIndex] = {};
+            userAnswers[qIndex][stmtIndex] = val;
+            
+            let q = finalQuestionList[qIndex];
+            if(Object.keys(userAnswers[qIndex]).length === q.bsData.length) {
+                updateGridStatus();
+            }
+        }
+
+        // ==========================================
+        // KEAMANAN & TIMER
+        // ==========================================
+        document.addEventListener('visibilitychange', () => {
+            if(document.visibilityState === 'hidden' && appState === 'playing') {
+                cheatWarnings++;
+                if(cheatWarnings >= 3) {
+                    alert("DISKUALIFIKASI! Anda telah keluar dari tab ujian sebanyak 3 kali.");
+                    finishExam(true);
+                } else {
+                    alert(`PERINGATAN KECURANGAN (${cheatWarnings}/3)!\nSistem mencatat Anda keluar dari layar ujian. Pelanggaran 3 kali akan menyebabkan diskualifikasi otomatis.`);
+                }
+            }
         });
 
-        // Reset tombol
-        document.querySelector('.btn-check').classList.remove('hidden');
-        document.getElementById('btnNext').classList.add('hidden');
-    }
-
-    // --- 4. CHECK ANSWER LOGIC ---
-    function checkAnswer() {
-        const q = allQuestions[currentIndex];
-        const inputs = document.querySelectorAll('input[name="soal_opt"]:checked');
-        
-        if (inputs.length === 0) {
-            alert("Pilih jawaban terlebih dahulu!");
-            return;
+        function startTimer() {
+            examTimer = setInterval(() => {
+                if(timeLeft <= 0) { clearInterval(examTimer); finishExam(); }
+                let h = Math.floor(timeLeft / 3600);
+                let m = Math.floor((timeLeft % 3600) / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timerDisplay').innerText = 
+                    `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                timeLeft--;
+            }, 1000);
         }
 
-        let isCorrect = false;
-        let userVals = Array.from(inputs).map(i => i.value);
-
-        // LOGIKA PENILAIAN
-        if (q.type === 'PG') {
-            // Single answer match (A, B, C...)
-            // Bersihkan Key dari spasi misal "B " -> "B"
-            let cleanKey = q.key.trim().toUpperCase(); 
-            // Kadang user input "Gambar B", kita ambil hurufnya saja kalau formatnya standar
-            // Tapi logic sederhana: cocokan value opsi (A,B,C,D) dengan Key.
-            // Di sini kita asumsikan Key user adalah "A" atau "B".
-            // Jika Key user "Gambar B", kita harus pintar. 
-            // Engine sederhana: Cek apakah Key mengandung UserVal
-            if (cleanKey.includes(userVals[0])) isCorrect = true; 
-        } 
-        else if (q.type === 'PGK') {
-            // Multi answer. Key: "A, B"
-            let keys = q.key.split(',').map(k => k.trim().toUpperCase());
-            // Cek apakah userVals sama persis dengan keys
-            // Sort keduanya biar urutan tidak masalah
-            let sortedUser = userVals.sort().join(',');
-            let sortedKey = keys.sort().join(',');
-            
-            // Logic longgar: User harus pilih SEMUA yang benar dan TIDAK memilih yang salah
-            // Untuk simplifikasi: Exact Match
-            // Namun, data input key nya kadang "A, B". Kita convert value opsi jadi A,B,C...
-            
-            // Cek manual:
-            let correctCount = 0;
-            let wrongCount = 0;
-            userVals.forEach(v => {
-                if (keys.includes(v)) correctCount++;
-                else wrongCount++;
-            });
-
-            // Benar jika memilih semua kunci dan tidak ada yang salah
-            if (correctCount === keys.length && wrongCount === 0) isCorrect = true;
-            // Partial score logic could go here
-        }
-        else if (q.type === 'BS') {
-            // BS di sini diperlakukan mirip PGK (Checklist pernyataan yang Benar)
-            // Di data parsing, kita set value option = true/false (boolean string? no, wait)
-            // Di render tadi, value=true/false from parsing.
-            // Tapi HTML value selalu string.
-            // Mari kita cek value input.
-            
-            // Revisi Logic BS:
-            // User mencentang item. Item tersebut haruslah yang bernilai TRUE (Benar).
-            // Item yang bernilai False jangan dicentang.
-            
-            let allCorrect = true;
-            document.querySelectorAll('input[name="soal_opt"]').forEach(inp => {
-                let shouldBeChecked = (inp.value === "true"); // Value dari parsing
-                if (inp.checked !== shouldBeChecked) {
-                    allCorrect = false;
-                }
-            });
-            isCorrect = allCorrect;
-        }
-
-        if (isCorrect) score++;
-
-        // Tampilkan Popup
-        showFeedback(isCorrect, q.explanation);
-        
-        // Ganti tombol
-        document.querySelector('.btn-check').classList.add('hidden');
-        document.getElementById('btnNext').classList.remove('hidden');
-    }
-
-    function showFeedback(isCorrect, explanation) {
-        const title = document.getElementById('modalTitle');
-        const msg = document.getElementById('modalMessage');
-        const overlay = document.getElementById('modalOverlay');
-
-        overlay.classList.remove('hidden');
-        if (isCorrect) {
-            title.innerHTML = "JAWABAN BENAR! 🎉";
-            title.className = "feedback-title correct-color";
-            msg.innerText = "Hebat! Analisis kamu tepat.";
-        } else {
-            title.innerHTML = "KURANG TEPAT 😅";
-            title.className = "feedback-title wrong-color";
-            msg.innerText = "Jangan menyerah, pelajari pembahasannya ya.";
-        }
-        document.getElementById('modalExplanation').innerText = explanation;
-    }
-
-    function closeModal() {
-        document.getElementById('modalOverlay').classList.add('hidden');
-    }
-
-    function nextQuestion() {
-        currentIndex++;
-        renderQuestion();
-    }
-
-    function finishQuiz() {
-        clearInterval(timerInterval);
-        const finalScore = Math.round((score / allQuestions.length) * 100);
-        
-        let html = `
-            <div style="text-align:center; padding: 50px;">
-                <h1 style="color:var(--primary)">UJIAN SELESAI</h1>
-                <div style="font-size: 4rem; color:var(--secondary); font-weight:bold;">${finalScore}</div>
-                <p>Nilai Akhir Kamu</p>
-                <p>Menjawab Benar: ${score} dari ${allQuestions.length} Soal</p>
-                <button class="btn-gold" onclick="location.reload()">ULANGI UJIAN</button>
-            </div>
-        `;
-        document.querySelector('main').innerHTML = html;
-        document.querySelector('header').style.display = 'none';
-    }
-
-    // --- 5. SYSTEM UTILS (Login, Timer, Security) ---
-    function attemptLogin() {
-        const input = document.getElementById('pinInput').value;
-        if (input === PIN_AKSES) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('quiz-container').classList.remove('hidden');
-            initQuizEngine(); // Jalankan mesin pengacak
-            renderQuestion();
-            startTimer();
-        } else {
-            document.getElementById('errorMsg').innerText = "PIN Salah! Silakan coba lagi.";
-        }
-    }
-
-    function startTimer() {
-        const timerDisplay = document.getElementById('timer');
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            let m = Math.floor(timeLeft / 60);
-            let s = timeLeft % 60;
-            timerDisplay.innerText = `${m}:${s < 10 ? '0'+s : s}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                alert("WAKTU HABIS!");
-                finishQuiz();
+        // ==========================================
+        // PENILAIAN & REVIEW
+        // ==========================================
+        function confirmSubmit() {
+            let ansCount = Object.keys(userAnswers).length;
+            if(ansCount < finalQuestionList.length) {
+                if(confirm(`Anda baru menjawab ${ansCount} dari ${finalQuestionList.length} soal. Yakin ingin mengakhiri ujian?`)) finishExam();
+            } else {
+                if(confirm("Apakah Anda yakin ingin menyelesaikan ujian sekarang?")) finishExam();
             }
-        }, 1000);
-    }
-
-    // Anti-Curang (Visibility API)
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden && !document.getElementById('quiz-container').classList.contains('hidden')) {
-            // alert("DILARANG PINDAH TAB! Waktu akan dikurangi 1 menit.");
-            // timeLeft -= 70; 
-            // (Dimatikan agar tidak terlalu agresif saat demo, aktifkan jika perlu)
-            console.log("User pindah tab");
         }
-    });
 
-    // Inisialisasi awal UI
-    document.querySelector('h2').innerText = JUDUL_KUIS;
+        let finalScoreValue = 0;
 
-</script>
+        function finishExam(disqualified = false) {
+            clearInterval(examTimer);
+            appState = 'finished';
+            document.getElementById('appScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            document.getElementById('appFooter').classList.remove('hidden');
 
+            if(disqualified) {
+                document.getElementById('finalScore').innerText = "0";
+                document.getElementById('certInputArea').classList.add('hidden');
+                alert("ANDA DIDISKUALIFIKASI KARENA TERINDIKASI CURANG.");
+                return;
+            }
+
+            let correctCount = 0;
+            finalQuestionList.forEach((q, idx) => {
+                let userAns = userAnswers[idx];
+                let isCorrect = false;
+
+                if(q.type === 'PG') {
+                    if(userAns === q.key) isCorrect = true;
+                } else if(q.type === 'PGK') {
+                    let keyArr = q.key.split(',').map(k=>k.trim()).sort();
+                    let uArr = (userAns || []).sort();
+                    if(JSON.stringify(keyArr) === JSON.stringify(uArr)) isCorrect = true;
+                } else if(q.type === 'BS') {
+                    let bsCorrect = true;
+                    if(!userAns || Object.keys(userAns).length !== q.bsData.length) bsCorrect = false;
+                    else {
+                        q.bsData.forEach((item, bIdx) => {
+                            if(userAns[bIdx] !== item.correct) bsCorrect = false;
+                        });
+                    }
+                    if(bsCorrect) isCorrect = true;
+                }
+
+                if(isCorrect) correctCount++;
+            });
+
+            // Kalkulasi nilai 
+            finalScoreValue = Math.round((correctCount / finalQuestionList.length) * 100);
+            document.getElementById('finalScore').innerText = finalScoreValue; 
+        }
+
+        // Fungsi Tampilkan Mini Sertifikat
+        function showMiniCert() {
+            let namaInput = document.getElementById('inputNamaSiswa').value.trim();
+            
+            if(namaInput === "") {
+                alert("Silakan ketikkan nama lengkap Anda terlebih dahulu!");
+                return;
+            }
+
+            document.getElementById('displayNamaSiswa').innerText = namaInput;
+            document.getElementById('certInputArea').classList.add('hidden');
+            document.getElementById('miniCertArea').classList.remove('hidden');
+        }
+
+        // Fungsi Unduh Gambar Sertifikat HD
+        function generateSertifikat() {
+            let namaSiswa = document.getElementById('displayNamaSiswa').innerText;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#0F3D81';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(10, 10, canvas.width - 20, canvas.height - 20);
+            
+            // Border Emas
+            ctx.strokeStyle = '#D4AF37';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+            // Teks Sertifikat
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#0F3D81';
+            
+            ctx.font = 'bold 40px Arial';
+            ctx.fillText('SERTIFIKAT PENGHARGAAN', canvas.width / 2, 100);
+            
+            ctx.font = '20px Arial';
+            ctx.fillText('Diberikan dengan bangga kepada:', canvas.width / 2, 160);
+            
+            ctx.font = 'bold 36px Arial';
+            ctx.fillStyle = '#D4AF37';
+            ctx.fillText(namaSiswa, canvas.width / 2, 220);
+
+            ctx.fillStyle = '#333';
+            ctx.font = '20px Arial';
+            ctx.fillText('Atas penyelesaian luar biasa dalam Kuis:', canvas.width / 2, 280);
+
+            ctx.font = 'bold 28px Arial';
+            ctx.fillStyle = '#0F3D81';
+            ctx.fillText(JUDUL_KUIS, canvas.width / 2, 330);
+
+            ctx.fillStyle = '#333';
+            ctx.font = '20px Arial';
+            ctx.fillText('Dengan Nilai Akhir:', canvas.width / 2, 400);
+
+            ctx.font = 'bold 80px Arial';
+            ctx.fillStyle = '#28a745';
+            ctx.fillText(finalScoreValue, canvas.width / 2, 490);
+
+            ctx.font = 'italic 18px Arial';
+            ctx.fillStyle = '#555';
+            ctx.fillText('Diselenggarakan oleh Belajar Sukses © 2026', canvas.width / 2, 560);
+
+            // Trigger Download
+            const link = document.createElement('a');
+            link.download = `Sertifikat_${namaSiswa.replace(/\s+/g, '_')}_Nilai_${finalScoreValue}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Fungsi Tampilkan Pembahasan Lengkap
+        function showReview() {
+            let container = document.getElementById('reviewContainer');
+            container.classList.remove('hidden');
+            let html = '<h3 style="color:var(--primary); border-bottom:2px solid var(--accent); padding-bottom:10px;">Review Kunci Jawaban & Pembahasan</h3>';
+            
+            finalQuestionList.forEach((q, idx) => {
+                let uAns = userAnswers[idx];
+                let isCorrect = false;
+                let ansText = "Belum Dijawab";
+
+                if(q.type === 'PG') {
+                    isCorrect = (uAns === q.key);
+                    ansText = uAns || "Kosong";
+                } else if(q.type === 'PGK') {
+                    let keyArr = q.key.split(',').map(k=>k.trim()).sort();
+                    let uArr = (uAns || []).sort();
+                    isCorrect = JSON.stringify(keyArr) === JSON.stringify(uArr);
+                    ansText = uArr.join(', ') || "Kosong";
+                } else if(q.type === 'BS') {
+                    let bsCorrect = true;
+                    if(!uAns || Object.keys(uAns).length !== q.bsData.length) bsCorrect = false;
+                    else {
+                        q.bsData.forEach((item, bIdx) => { if(uAns[bIdx] !== item.correct) bsCorrect = false; });
+                    }
+                    isCorrect = bsCorrect;
+                    ansText = isCorrect ? "Tepat Sesuai Kunci" : "Ada pernyataan yang tidak tepat";
+                }
+
+                html += `
+                    <div class="review-item ${isCorrect ? 'correct' : 'wrong'}">
+                        <strong>Soal ${idx+1} (${q.type})</strong> - ${isCorrect ? '<span style="color:green">Benar</span>' : '<span style="color:red">Salah</span>'}<br>
+                        <p>${q.question}</p>
+                        <div style="font-size: 0.9em; margin-bottom: 10px;">
+                            Jawaban Anda: <b>${ansText}</b> <br>
+                            Kunci Jawaban: <b>${q.type === 'BS' ? 'Sesuai Pembahasan' : q.key}</b>
+                        </div>
+                        <div class="pembahasan"><strong>Pembahasan:</strong><br>${q.explanation}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+    </script>
 </body>
 </html>
